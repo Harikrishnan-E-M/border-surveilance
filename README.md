@@ -1,13 +1,14 @@
-# VisionAI Aegis
+# IBVAP – Intelligent Border Video Analytics Platform
 
-Enterprise-grade AI-powered video surveillance and analytics platform. VisionAI Aegis provides real-time intelligent video analysis with computer vision, face recognition, license plate recognition, anomaly detection, and comprehensive reporting -- all orchestrated through a modern web dashboard.
+> **AI-Based Intelligent Video Analytics Platform for Border Surveillance using Existing CCTV Infrastructure**
 
-**Author:** Sherin Joseph Roy
+IBVAP transforms standard, existing CCTV camera networks deployed across Border Out Posts (BOPs), check posts, border roads, and strategic installations into an intelligent, autonomous border surveillance grid. By executing AI-driven computer vision analytics directly in software, IBVAP eliminates the need for expensive, proprietary FRS, ANPR, or smart-camera hardware.
 
 ---
 
 ## Table of Contents
 
+- [Problem Statement Alignment](#problem-statement-alignment)
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
@@ -21,29 +22,40 @@ Enterprise-grade AI-powered video surveillance and analytics platform. VisionAI 
 - [Computer Vision Pipeline](#computer-vision-pipeline)
 - [Frontend Dashboard](#frontend-dashboard)
 - [Background Processing](#background-processing)
-- [Infrastructure Services](#infrastructure-services)
-- [GPU Support](#gpu-support)
-- [Environment Variables](#environment-variables)
 - [License](#license)
+
+---
+
+## Problem Statement Alignment
+
+| Problem Statement Requirement | IBVAP Solution & Feature Implementation |
+|---|---|
+| **Software-Defined AI Platform** | Ingests live streams from standard IP/USB cameras without requiring specialized hardware. |
+| **Human Detection & Tracking** | Real-time human bounding box detection, track ID assignment, and intruder perimeter alerts. |
+| **Vehicle Detection & Classification** | Real-time identification of civilian, military, and commercial border transport vehicles. |
+| **Face Detection & Recognition (FRS)** | SCRFD + ArcFace powered facial detection, watchlist matching, and unknown face alerts at border checkposts. |
+| **Automatic Number Plate Recognition (ANPR)** | High-precision plate location and OCR character extraction for vehicular access control. |
+| **Virtual Fence Intrusion Detection** | Custom polygonal border breach zones with immediate visual and database alarm triggers. |
+| **Suspicious Activity & Anomaly Detection** | Detects loitering, night-time movement, fast-moving intrusions, and perimeter breaches. |
+| **Real-time Alert Generation & Logging** | Real-time WebSocket notifications, incident logging, and automated command center dispatch. |
+| **Cost-Effective & Remote Deployment** | Lightweight ONNX Runtime inference optimized for edge BOP deployment on low-cost hardware. |
 
 ---
 
 ## Overview
 
-VisionAI Aegis is a full-stack, production-ready video surveillance platform that combines deep learning-based computer vision with a scalable microservices backend and a responsive web dashboard. The system is designed for organizations that require intelligent monitoring, automated alerting, and data-driven insights from their camera infrastructure.
+IBVAP (Intelligent Border Video Analytics Platform) is a full-stack, software-defined surveillance solution designed for national security and border defense forces. Standard CCTV feeds are transformed into actionable intelligence streams equipped with real-time detection overlays, automated incident alerts, and central command monitoring.
 
 Key capabilities:
 
-- **Real-time object detection** using YOLOv8 with ONNX Runtime inference
-- **Face recognition** with enrollment, search, and watchlist management
-- **License plate recognition** (ANPR) with vehicle tracking and classification
-- **Anomaly detection** using statistical and ML-based behavioral analysis
-- **Person re-identification** across multiple cameras using deep embeddings
-- **Semantic search** powered by CLIP embeddings and pgvector
-- **Predictive analytics** with trend forecasting and pattern recognition
-- **Multi-site federation** for distributed camera networks
-- **AI Copilot** powered by Anthropic Claude for natural language querying
-- **Edge device management** for distributed deployments
+- **Virtual Fence Intrusion Detection** for border perimeter and BOP defense
+- **Human Detection & Tracking** with perimeter breach notification
+- **Facial Recognition System (FRS)** with enrollment, search, and watchlist matching
+- **Automatic License Plate Recognition (ANPR)** for border checkpoint vehicle monitoring
+- **Night-Time Movement & Anomaly Analytics** for low-light loitering and intrusion
+- **Real-Time Video Analytics HUD** overlaid on live camera feeds
+- **Centralized Incident Dashboard** for border command and control operational awareness
+- **Edge Deployment Architecture** capable of offline operation at remote Border Out Posts (BOPs)
 
 ---
 

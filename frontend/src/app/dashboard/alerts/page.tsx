@@ -132,7 +132,7 @@ export default function AlertsPage() {
         total: raw.total ?? (raw.items || raw.data || []).length,
       };
     },
-    refetchInterval: 15000,
+    refetchInterval: 5000,
   });
 
   const alerts = alertsData?.items ?? [];

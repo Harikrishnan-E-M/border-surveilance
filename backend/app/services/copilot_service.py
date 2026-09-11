@@ -542,7 +542,7 @@ class CopilotService:
 
         current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-        return f"""You are the VisionAI Surveillance Copilot, an intelligent AI assistant embedded in the VisionAI video surveillance and analytics platform. You help security operators, facility managers, and administrators query and understand their surveillance system through natural language.
+        return f"""You are the IBVAP Border Surveillance Copilot, an intelligent AI assistant embedded in the IBVAP (Intelligent Border Video Analytics Platform) system for border surveillance. You help border security forces, outpost commanders, and operators query and monitor border perimeter security through natural language.
 
 ## Your Capabilities
 - Query and analyze alerts (intrusion, loitering, fire/smoke, PPE violations, etc.)

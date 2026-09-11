@@ -211,7 +211,7 @@ const INTEGRATION_TYPES = [
     label: 'Jira',
     icon: Shield,
     color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-    description: 'Create Jira issues from VisionAI alerts for tracking.',
+    description: 'Create Jira issues from IBVAP alerts for tracking.',
   },
 ];
 
@@ -931,7 +931,7 @@ export default function IntegrationsPage() {
         <TabsContent value="integrations" className="mt-6 space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Connect VisionAI with your existing tools and services.
+              Connect IBVAP with your existing tools and services.
             </p>
             <Button onClick={() => { resetIntegrationForm(); setAddIntegrationOpen(true); }}>
               <Plus className="mr-1.5 h-4 w-4" />
@@ -1167,7 +1167,7 @@ export default function IntegrationsPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium">URL</Label>
                 <Input
-                  placeholder="https://hooks.example.com/visionai"
+                  placeholder="https://hooks.example.com/ibvap"
                   value={whUrl}
                   onChange={(e) => setWhUrl(e.target.value)}
                 />
@@ -1189,7 +1189,7 @@ export default function IntegrationsPage() {
                   </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground">
-                  Use this secret to verify webhook signatures (X-VisionAI-Signature header).
+                  Use this secret to verify webhook signatures (X-IBVAP-Signature header).
                 </p>
               </div>
             )}
@@ -1436,7 +1436,7 @@ export default function IntegrationsPage() {
             <DialogDescription>
               {editIntegrationOpen
                 ? 'Update the integration configuration.'
-                : 'Connect a third-party service to receive VisionAI events.'}
+                : 'Connect a third-party service to receive IBVAP events.'}
             </DialogDescription>
           </DialogHeader>
 

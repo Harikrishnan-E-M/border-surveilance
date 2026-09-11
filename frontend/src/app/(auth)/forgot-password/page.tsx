@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
             <Eye className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            VisionAI
+            IBVAP
           </h1>
         </div>
 

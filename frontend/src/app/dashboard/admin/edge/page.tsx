@@ -578,7 +578,7 @@ export default function EdgeDevicesPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Edge Devices</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage Jetson and edge compute devices running VisionAI CV pipelines
+            Manage Jetson and edge compute devices running IBVAP border video analytics pipelines
           </p>
         </div>
         <div className="flex items-center gap-2">

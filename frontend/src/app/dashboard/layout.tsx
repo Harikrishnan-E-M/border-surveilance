@@ -198,7 +198,7 @@ export default function DashboardLayout({
           <Eye className="h-5 w-5 text-white" />
         </div>
         {!sidebarCollapsed && (
-          <span className="text-lg font-bold text-slate-900 dark:text-white">VisionAI</span>
+          <span className="text-lg font-bold text-slate-900 dark:text-white">IBVAP Aegis</span>
         )}
       </div>
 

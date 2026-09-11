@@ -32,8 +32,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>VisionAI</title>
-        <meta name="description" content="AI-Powered Surveillance Platform" />
+        <title>IBVAP – Intelligent Border Video Analytics Platform</title>
+        <meta name="description" content="AI-Based Video Analytics Platform for Border Surveillance using Existing CCTV Infrastructure" />
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>

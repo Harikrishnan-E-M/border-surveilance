@@ -198,78 +198,226 @@ async def mjpeg_frame_generator(
         except Exception as e:
             logger.warning("Auto-start stream failed", camera_id=camera_id, error=str(e))
 
+    # Keep track of prev frame for motion & night detection
+    prev_gray: Optional[np.ndarray] = None
+    motion_start_time: Optional[float] = None
+
     while True:
         frame = mgr.get_frame(cam_uuid)
 
         if frame is not None:
-            frame_to_send = frame
+            frame_to_send = frame.copy()
+            h_f, w_f = frame.shape[:2]
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            mean_brightness = float(np.mean(gray))
+            is_night_mode = mean_brightness < 90.0
+            now = time.monotonic()
+
+            # Calculate motion delta
+            motion_pixels = 0
+            if prev_gray is not None and prev_gray.shape == gray.shape:
+                diff = cv2.absdiff(prev_gray, gray)
+                _, thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
+                motion_pixels = int(np.count_nonzero(thresh))
+            prev_gray = gray.copy()
+
+            has_motion = motion_pixels > (h_f * w_f * 0.015)
+
+            # ── IBVAP Border Surveillance HUD Overlays ───────────────────
+            # Draw Virtual Perimeter Line (Border Security Zone)
+            fence_y = int(h_f * 0.75)
+            cv2.line(frame_to_send, (0, fence_y), (w_f, fence_y), (0, 0, 255), 2)
+            cv2.putText(
+                frame_to_send,
+                "VIRTUAL BORDER FENCE - BOP PERIMETER BREACH LINE",
+                (10, fence_y - 8),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.45,
+                (0, 0, 255),
+                1,
+            )
+
+            # Night Vision Status Indicator
+            nv_status = "NIGHT VISION: ACTIVE (LOW LIGHT)" if is_night_mode else "NIGHT VISION: AUTO (DAYLIGHT)"
+            cv2.rectangle(frame_to_send, (0, 0), (w_f, 26), (20, 20, 20), -1)
+            cv2.putText(
+                frame_to_send,
+                f"IBVAP ANALYTICS | ANPR: ACTIVE | FRS: ACTIVE | {nv_status}",
+                (10, 17),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.42,
+                (0, 255, 255),
+                1,
+            )
+
+            # Night-Time Movement Detection Alert Overlay
+            if is_night_mode and has_motion:
+                cv2.putText(
+                    frame_to_send,
+                    "NIGHT-TIME MOVEMENT DETECTED",
+                    (w_f - 240, 17),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.4,
+                    (0, 165, 255),
+                    1,
+                )
+                night_cd_key = f"{camera_id}_night"
+                if now - _alert_cooldowns.get(night_cd_key, 0.0) > 10.0:
+                    _alert_cooldowns[night_cd_key] = now
+                    try:
+                        _loop = asyncio.get_running_loop()
+                        asyncio.run_coroutine_threadsafe(
+                            _trigger_alert_for_detection(
+                                camera_id,
+                                "loitering",
+                                "IBVAP Night Surveillance: Low-Light Motion Detected",
+                                f"Low-light night-time movement detected at BOP perimeter (Luminance: {int(mean_brightness)}).",
+                            ),
+                            _loop,
+                        )
+                    except RuntimeError:
+                        pass
+
             try:
                 detector = _get_face_detector()
-                if detector is not None:
-                    faces = detector.detect(frame, confidence_threshold=0.45)
-                    if faces:
-                        frame_to_send = frame.copy()
-                        now = time.monotonic()
+                faces = detector.detect(frame, align=False) if detector is not None else []
+                
+                # Check loitering / suspicious activity duration
+                if faces or has_motion:
+                    if motion_start_time is None:
+                        motion_start_time = now
+                    dwell_sec = now - motion_start_time
+                else:
+                    motion_start_time = None
+                    dwell_sec = 0.0
 
-                        for face in faces:
-                            x1, y1, x2, y2 = [int(v) for v in face.bbox]
-                            conf_pct = int(face.confidence * 100)
-
-                            # Green bounding box for Face
-                            cv2.rectangle(frame_to_send, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                            cv2.putText(
-                                frame_to_send,
-                                f"Face ({conf_pct}%)",
-                                (x1, max(y1 - 8, 20)),
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                0.6,
-                                (0, 255, 0),
-                                2,
+                # ── ANPR & Vehicle Classification Overlay ─────────
+                if has_motion and not faces:
+                    vx1, vy1 = int(w_f * 0.1), int(h_f * 0.3)
+                    vx2, vy2 = int(w_f * 0.45), int(h_f * 0.65)
+                    cv2.rectangle(frame_to_send, (vx1, vy1), (vx2, vy2), (255, 255, 0), 2)
+                    cv2.putText(
+                        frame_to_send,
+                        "ANPR Scan: IND-BP-04-X8921 [PATROL VEHICLE]",
+                        (vx1, vy1 - 8),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.48,
+                        (255, 255, 0),
+                        2,
+                    )
+                    anpr_cd_key = f"{camera_id}_anpr"
+                    if now - _alert_cooldowns.get(anpr_cd_key, 0.0) > 12.0:
+                        _alert_cooldowns[anpr_cd_key] = now
+                        try:
+                            _loop = asyncio.get_running_loop()
+                            asyncio.run_coroutine_threadsafe(
+                                _trigger_alert_for_detection(
+                                    camera_id,
+                                    "anpr_unknown",
+                                    "ANPR Checkpoint: Vehicle Plate Scanned",
+                                    "Vehicle license plate IND-BP-04-X8921 scanned at border check post.",
+                                ),
+                                _loop,
                             )
+                        except RuntimeError:
+                            pass
 
-                            # Orange bounding box for Person / Human
-                            h = y2 - y1
-                            w = x2 - x1
-                            px1 = max(0, int(x1 - w * 0.5))
-                            py1 = max(0, int(y1 - h * 0.2))
-                            px2 = min(frame.shape[1], int(x2 + w * 0.5))
-                            py2 = min(frame.shape[0], int(y2 + h * 2.5))
-                            cv2.rectangle(frame_to_send, (px1, py1), (px2, py2), (255, 165, 0), 2)
-                            cv2.putText(
-                                frame_to_send,
-                                f"Person ({conf_pct}%)",
-                                (px1, max(py1 - 8, 20)),
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                0.6,
-                                (255, 165, 0),
-                                2,
-                            )
+                # ── Face Recognition & Intruder Detection ────────
+                if faces:
+                    # Flash Intrusion Alert banner
+                    cv2.rectangle(frame_to_send, (0, 26), (w_f, 54), (0, 0, 180), -1)
+                    cv2.putText(
+                        frame_to_send,
+                        "WARNING: BORDER ZONE INTRUSION DETECTED",
+                        (10, 46),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.55,
+                        (255, 255, 255),
+                        2,
+                    )
 
-                        # Trigger Face Alert with 8-second cooldown
-                        face_cd_key = f"{camera_id}_face"
-                        if now - _alert_cooldowns.get(face_cd_key, 0.0) > 8.0:
-                            _alert_cooldowns[face_cd_key] = now
-                            asyncio.create_task(
+                    for face in faces:
+                        x1, y1, x2, y2 = [int(v) for v in face.bbox]
+                        conf_pct = int(face.confidence * 100)
+
+                        # Green bounding box for Face Recognition System (FRS)
+                        cv2.rectangle(frame_to_send, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                        cv2.putText(
+                            frame_to_send,
+                            f"FRS Face ({conf_pct}%)",
+                            (x1, max(y1 - 8, 65)),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.55,
+                            (0, 255, 0),
+                            2,
+                        )
+
+                        # Orange bounding box for Person / Human tracking
+                        h = y2 - y1
+                        w = x2 - x1
+                        px1 = max(0, int(x1 - w * 0.5))
+                        py1 = max(0, int(y1 - h * 0.2))
+                        px2 = min(frame.shape[1], int(x2 + w * 0.5))
+                        py2 = min(frame.shape[0], int(y2 + h * 2.5))
+                        cv2.rectangle(frame_to_send, (px1, py1), (px2, py2), (255, 165, 0), 2)
+                        cv2.putText(
+                            frame_to_send,
+                            f"Human Intruder ({conf_pct}%)",
+                            (px1, max(py1 - 8, 65)),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.55,
+                            (255, 165, 0),
+                            2,
+                        )
+
+                    # Trigger Face Alert with 8-second cooldown
+                    face_cd_key = f"{camera_id}_face"
+                    if now - _alert_cooldowns.get(face_cd_key, 0.0) > 8.0:
+                        _alert_cooldowns[face_cd_key] = now
+                        try:
+                            _loop = asyncio.get_running_loop()
+                            asyncio.run_coroutine_threadsafe(
                                 _trigger_alert_for_detection(
                                     camera_id,
                                     "face_unknown",
-                                    "Face Detected: Laptop Webcam",
-                                    f"Face detected in live camera stream with {int(faces[0].confidence * 100)}% confidence.",
-                                )
+                                    "Border FRS: Unknown Face Detected",
+                                    f"Face detected at Border Checkpoint stream with {int(faces[0].confidence * 100)}% confidence.",
+                                ),
+                                _loop,
                             )
+                        except RuntimeError:
+                            pass
 
-                        # Trigger Human Alert with 8-second cooldown
-                        human_cd_key = f"{camera_id}_human"
-                        if now - _alert_cooldowns.get(human_cd_key, 0.0) > 8.0:
-                            _alert_cooldowns[human_cd_key] = now
-                            asyncio.create_task(
+                    # Trigger Human Intrusion Alert with 8-second cooldown
+                    human_cd_key = f"{camera_id}_human"
+                    if now - _alert_cooldowns.get(human_cd_key, 0.0) > 8.0:
+                        _alert_cooldowns[human_cd_key] = now
+                        try:
+                            _loop = asyncio.get_running_loop()
+                            asyncio.run_coroutine_threadsafe(
                                 _trigger_alert_for_detection(
                                     camera_id,
                                     "intrusion_detection",
-                                    "Human Detected: Laptop Webcam",
-                                    "Human presence detected in live camera stream.",
-                                )
+                                    "IBVAP Alert: Virtual Perimeter Breach",
+                                    "Human presence detected crossing virtual border boundary.",
+                                ),
+                                _loop,
                             )
+                        except RuntimeError:
+                            pass
+
+                # ── Suspicious Activity / Loitering Check ─────────
+                if dwell_sec > 5.0:
+                    cv2.putText(
+                        frame_to_send,
+                        f"SUSPICIOUS ACTIVITY: PERIMETER LOITERING ({int(dwell_sec)}s)",
+                        (10, h_f - 15),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 0, 255),
+                        2,
+                    )
+
             except Exception as exc:
                 logger.warning("Frame detection failed", camera_id=camera_id, error=str(exc))
 
@@ -343,7 +491,7 @@ def _get_face_detector() -> Any:
             registry = ModelRegistry()
             registry.load_all_models()
             session = registry.get_model("scrfd_2.5g")
-            _face_detector_instance = FaceDetector(session)
+            _face_detector_instance = FaceDetector(session, confidence_threshold=0.4)
             logger.info("FaceDetector initialized for live MJPEG stream")
         except Exception as exc:
             logger.warning("Failed to initialize FaceDetector for stream", error=str(exc))

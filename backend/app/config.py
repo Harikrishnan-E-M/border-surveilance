@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     )
 
     # ── General ───────────────────────────────────────────────────────────
-    APP_NAME: str = "VisionAI"
+    APP_NAME: str = "IBVAP"
     APP_ENV: str = Field(default="development", pattern="^(development|staging|production|testing)$")
     DEBUG: bool = False
     LOG_LEVEL: str = Field(default="INFO", pattern="(?i)^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")

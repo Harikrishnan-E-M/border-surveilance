@@ -123,14 +123,16 @@ export function Sidebar({ user, className }: SidebarProps) {
           className
         )}
       >
-        {/* Logo */}
         <div className="flex h-16 items-center border-b px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Eye className="h-5 w-5 text-primary-foreground" />
+              <Shield className="h-5 w-5 text-primary-foreground" />
             </div>
             {!collapsed && (
-              <span className="text-lg font-bold tracking-tight">VisionAI</span>
+              <div className="flex flex-col">
+                <span className="text-base font-bold tracking-tight leading-tight">IBVAP</span>
+                <span className="text-[10px] text-muted-foreground leading-tight font-medium">Border Analytics</span>
+              </div>
             )}
           </Link>
         </div>

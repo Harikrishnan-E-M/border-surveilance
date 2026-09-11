@@ -24,7 +24,7 @@ export default function RootPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/30">
             <Eye className="h-7 w-7 text-white" />
           </div>
-          <span className="text-3xl font-bold text-white">VisionAI</span>
+          <span className="text-3xl font-bold text-white">IBVAP</span>
         </div>
         <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
         <p className="text-sm text-slate-400">Redirecting...</p>

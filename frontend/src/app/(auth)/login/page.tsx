@@ -62,10 +62,10 @@ export default function LoginPage() {
             <Eye className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-            VisionAI
+            IBVAP
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            AI-Powered Surveillance Platform
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 font-medium">
+            Intelligent Border Video Analytics Platform
           </p>
         </div>
 
@@ -162,7 +162,7 @@ export default function LoginPage() {
         </Card>
 
         <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-          Protected by VisionAI Security. Unauthorized access is prohibited.
+          Protected by IBVAP Border Security System. Unauthorized access is prohibited.
         </p>
       </div>
     </div>

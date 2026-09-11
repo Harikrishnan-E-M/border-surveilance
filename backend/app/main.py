@@ -187,12 +187,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         settings = get_settings()
 
     app = FastAPI(
-        title="VisionAI API",
+        title="IBVAP API",
         description=(
-            "Enterprise-grade AI-powered video surveillance and analytics "
-            "platform.  Provides camera management, real-time object detection, "
-            "face recognition, license plate recognition, anomaly detection, "
-            "and comprehensive reporting."
+            "AI-Based Intelligent Video Analytics Platform for Border Surveillance "
+            "using existing CCTV Infrastructure. Provides human detection & tracking, "
+            "vehicle classification, face recognition (FRS), ANPR, virtual fence "
+            "intrusion detection, suspicious activity detection, and night-time movement monitoring."
         ),
         version=__version__,
         docs_url="/docs" if not settings.is_production else None,

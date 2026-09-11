@@ -453,7 +453,7 @@ export default function FederationPage() {
             Multi-Site Federation
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage and monitor all federated VisionAI sites from a single dashboard
+            Manage and monitor all federated IBVAP border outposts and checkposts from a single dashboard
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -1056,7 +1056,7 @@ export default function FederationPage() {
               Add Federated Site
             </DialogTitle>
             <DialogDescription>
-              Register a remote VisionAI instance to federate with this hub
+              Register a remote IBVAP border outpost instance to federate with this central command hub
             </DialogDescription>
           </DialogHeader>
 
