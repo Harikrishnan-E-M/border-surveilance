@@ -79,11 +79,10 @@ Key capabilities:
    +----------+      +-----------+
 ```
 
-The platform consists of nine Docker containers orchestrated via Docker Compose:
+The platform runs natively as microservices connecting FastAPI (Backend) and Next.js (Frontend) to infrastructure services:
 
 | Service      | Role                                              | Port(s)         |
 |-------------|---------------------------------------------------|-----------------|
-| **nginx**    | TLS termination, reverse proxy, rate limiting     | 80, 443         |
 | **api**      | FastAPI REST API and WebSocket server              | 8000            |
 | **frontend** | Next.js server-side rendered dashboard             | 3000            |
 | **postgres** | PostgreSQL 16 with pgvector extension              | 5432            |
@@ -474,79 +473,70 @@ VisionAI/
 
 ## Prerequisites
 
-- **Docker** 24.0+ and **Docker Compose** v2.20+
+- **Python** 3.11+ (Python 3.13 supported)
+- **Node.js** 20+ (Node 22 supported) & npm
 - **Git** 2.30+
-- (Optional) **NVIDIA GPU** with CUDA 11.8+ and nvidia-container-toolkit for GPU inference
+- (Optional) **PostgreSQL 16 with pgvector**, **Redis**, **MinIO**, **MediaMTX**
 - Minimum 8 GB RAM (16 GB recommended for production)
 - Minimum 20 GB disk space
 
 ---
 
-## Installation
+## Installation & Native Execution
 
-### 1. Clone the Repository
+### 1. Run Automatic Local Setup Script (Windows PowerShell)
 
-```bash
-git clone https://github.com/Sherin-SEF-AI/VisionAI-Aegis.git
-cd VisionAI-Aegis
+```powershell
+.\scripts\setup_env.ps1
 ```
+This script will:
+- Create a Python virtual environment (`venv`)
+- Install all backend dependencies from `backend/requirements.txt`
+- Install all frontend dependencies via `npm install` inside `frontend/`
+- Generate `.env` from `.env.example`
 
 ### 2. Configure Environment
 
-```bash
-cp .env.example .env
+Edit `.env` and update the required values for your local setup:
+- `DATABASE_URL` (e.g. `postgresql+asyncpg://visionai:visionai_secret@localhost:5432/visionai`)
+- `REDIS_URL` (e.g. `redis://:visionai_redis@localhost:6379/0`)
+- `SECRET_KEY` & `JWT_SECRET_KEY`
+- `ADMIN_EMAIL` & `ADMIN_PASSWORD`
+
+### 3. Run Database Migrations
+
+```powershell
+# Activate venv and run Alembic migrations
+.\venv\Scripts\Activate.ps1
+cd backend
+alembic upgrade head
+cd ..
 ```
 
-Edit `.env` and update the following required values:
+### 4. Start Backend Server
 
-- `SECRET_KEY` -- random 64-character string for session security
-- `JWT_SECRET_KEY` -- random 64-character string for JWT signing
-- `POSTGRES_PASSWORD` -- database password
-- `REDIS_PASSWORD` -- Redis password
-- `MINIO_ROOT_PASSWORD` -- object storage password
-- `ADMIN_EMAIL` and `ADMIN_PASSWORD` -- initial admin credentials
-- `ANTHROPIC_API_KEY` -- (optional) for AI Copilot functionality
-- `SMTP_*` -- (optional) for email notifications
-
-### 3. Generate SSL Certificates (Development)
-
-For local development with self-signed certificates:
-
-```bash
-mkdir -p nginx/certs
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout nginx/certs/privkey.pem \
-  -out nginx/certs/fullchain.pem \
-  -subj "/CN=localhost"
+```powershell
+.\scripts\start_backend.ps1
 ```
+The FastAPI backend server will start at `http://localhost:8000`. Swagger API docs will be available at `http://localhost:8000/docs`.
 
-### 4. Build and Start
+### 5. Start Frontend Server
 
-```bash
-docker compose build
-docker compose up -d
+Open a second PowerShell terminal window:
+```powershell
+.\scripts\start_frontend.ps1
 ```
+The Next.js frontend application will start at `http://localhost:3000`.
 
-### 5. Run Database Migrations
+---
 
-```bash
-docker compose exec api alembic upgrade head
-```
-
-### 6. (Optional) Download Pre-trained Models
-
-```bash
-docker compose exec api python scripts/download_models.py
-```
-
-### 7. Access the Platform
+## Access the Platform
 
 | Interface           | URL                          |
 |--------------------|------------------------------|
-| Dashboard          | https://localhost             |
-| API Documentation  | https://localhost/docs        |
-| MinIO Console      | http://localhost:9001         |
-| MediaMTX Status    | http://localhost:9997         |
+| Dashboard UI       | http://localhost:3000         |
+| API Documentation  | http://localhost:8000/docs    |
+| ReDoc API Specs    | http://localhost:8000/redoc   |
 
 Default login credentials are defined by `ADMIN_EMAIL` and `ADMIN_PASSWORD` in your `.env` file.
 
