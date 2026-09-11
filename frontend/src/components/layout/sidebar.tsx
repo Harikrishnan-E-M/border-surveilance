@@ -54,17 +54,6 @@ const navigation: NavItem[] = [
   { label: "Cameras", href: "/dashboard/cameras", icon: Camera },
   { label: "Faces", href: "/dashboard/faces", icon: Users },
   { label: "Vehicles", href: "/dashboard/vehicles/logs", icon: Car },
-  {
-    label: "Analytics",
-    icon: BarChart3,
-    children: [
-      { label: "Footfall", href: "/dashboard/analytics/footfall", icon: Footprints },
-      { label: "Heatmap", href: "/dashboard/analytics/heatmap", icon: Flame },
-      { label: "Attendance", href: "/dashboard/analytics/attendance", icon: UserCheck },
-      { label: "PPE Compliance", href: "/dashboard/analytics/ppe", icon: HardHat },
-      { label: "Patterns", href: "/dashboard/analytics/patterns", icon: TrendingUp },
-    ],
-  },
   { label: "Recordings", href: "/dashboard/recordings", icon: Film },
   { label: "Reports", href: "/dashboard/reports", icon: FileText },
   {

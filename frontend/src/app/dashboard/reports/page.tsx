@@ -119,13 +119,7 @@ const reportTemplates: ReportTemplate[] = [
     icon: 'ShieldAlert',
     category: 'security',
   },
-  {
-    id: 'attendance-report',
-    name: 'Attendance Report',
-    description: 'Face recognition-based attendance tracking and statistics.',
-    icon: 'UserCheck',
-    category: 'attendance',
-  },
+
   {
     id: 'vehicle-log',
     name: 'Vehicle Log',

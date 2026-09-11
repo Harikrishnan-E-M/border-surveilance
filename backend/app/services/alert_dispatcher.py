@@ -140,35 +140,44 @@ async def dispatch(alert: Alert) -> None:
     except Exception as exc:
         logger.debug("Celery task queueing failed", error=str(exc))
 
+    await broadcast_to_websocket(alert)
+
 
 async def broadcast_to_websocket(alert: Alert) -> None:
     """Broadcast an alert event to connected WebSocket clients.
 
-    Uses Redis pub/sub for distribution to all API server instances.
-
-    Args:
-        alert: The alert to broadcast.
+    Uses direct WebSocket ConnectionManager as primary delivery and Redis pub/sub as fallback.
     """
     payload = {
         "event": "new_alert",
         "data": {
             "id": str(alert.id),
-            "alert_type": alert.alert_type.value,
-            "severity": alert.severity.value,
+            "alert_type": alert.alert_type.value if hasattr(alert.alert_type, "value") else str(alert.alert_type),
+            "severity": alert.severity.value if hasattr(alert.severity, "value") else str(alert.severity),
             "title": alert.title,
             "camera_id": str(alert.camera_id),
-            "status": alert.status.value,
+            "status": alert.status.value if hasattr(alert.status, "value") else str(alert.status),
             "created_at": alert.created_at.isoformat() if alert.created_at else None,
         },
     }
 
+    # 1. Direct in-memory WebSocket delivery (Instant delivery without Redis)
+    try:
+        from app.api.v1.websocket import manager
+        await manager.send_message("alerts", payload)
+        await manager.send_message(f"alerts:{alert.org_id}", payload)
+    except Exception as exc:
+        logger.debug("Direct WebSocket delivery failed", error=str(exc))
+
+    # 2. Redis pub/sub delivery fallback
     try:
         from app.dependencies import get_redis
 
         redis = await get_redis()
-        await redis.publish(f"ws:alerts:{alert.org_id}", json.dumps(payload))
+        if redis:
+            await redis.publish(f"ws:alerts:{alert.org_id}", json.dumps(payload))
     except Exception as exc:
-        logger.debug("WebSocket broadcast failed", error=str(exc))
+        logger.debug("WebSocket Redis broadcast failed", error=str(exc))
 
 
 # ── Alert Actions ────────────────────────────────────────────────────────

@@ -297,7 +297,8 @@ def _test_stream_sync(stream_url: str) -> dict[str, Any]:
     """Synchronous stream test using OpenCV VideoCapture."""
     cap = None
     try:
-        cap = cv2.VideoCapture(stream_url)
+        from app.utils.video_utils import open_opencv_capture
+        cap = open_opencv_capture(stream_url)
         if not cap.isOpened():
             return {
                 "success": False,
@@ -376,7 +377,8 @@ def _capture_snapshot_sync(stream_url: str) -> Optional[bytes]:
     """Synchronous snapshot capture using OpenCV."""
     cap = None
     try:
-        cap = cv2.VideoCapture(stream_url)
+        from app.utils.video_utils import open_opencv_capture
+        cap = open_opencv_capture(stream_url)
         if not cap.isOpened():
             return None
 

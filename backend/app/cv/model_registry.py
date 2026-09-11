@@ -102,13 +102,10 @@ class ModelRegistry:
         """Determine the best provider chain for the current hardware.
 
         Priority order:
-        1. TensorrtExecutionProvider (if available)
-        2. CUDAExecutionProvider (if available)
-        3. CPUExecutionProvider (always available)
-
-        Returns:
-            list[str]: Ordered list of providers to pass to
-                ``InferenceSession``.
+        1. TensorrtExecutionProvider
+        2. CUDAExecutionProvider
+        3. DmlExecutionProvider (DirectML for Windows GPU acceleration - NVIDIA/AMD/Intel)
+        4. CPUExecutionProvider
         """
         available = ort.get_available_providers()
         providers: list[str] = []
@@ -117,6 +114,8 @@ class ModelRegistry:
             providers.append("TensorrtExecutionProvider")
         if "CUDAExecutionProvider" in available:
             providers.append("CUDAExecutionProvider")
+        if "DmlExecutionProvider" in available:
+            providers.append("DmlExecutionProvider")
         providers.append("CPUExecutionProvider")
 
         logger.info(
@@ -128,16 +127,15 @@ class ModelRegistry:
 
     @staticmethod
     def _build_session_options() -> ort.SessionOptions:
-        """Build shared session options with sensible defaults.
-
-        Returns:
-            ort.SessionOptions: Configured session options.
-        """
+        """Build shared session options with sensible defaults."""
         opts = ort.SessionOptions()
         opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
         opts.enable_mem_pattern = True
         opts.enable_cpu_mem_arena = True
+        # Restrict CPU threads to prevent CPU overheating
+        opts.intra_op_num_threads = 2
+        opts.inter_op_num_threads = 1
         # Use half the available cores for intra-op parallelism
         import os
         cpu_count = os.cpu_count() or 4

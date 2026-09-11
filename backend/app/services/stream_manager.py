@@ -207,7 +207,8 @@ class CameraStreamWorker:
             else:
                 source = self.stream_url
 
-            self._cap = cv2.VideoCapture(source)
+            from app.utils.video_utils import open_opencv_capture
+            self._cap = open_opencv_capture(source)
             if self._cap.isOpened():
                 self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
                 return True
@@ -238,6 +239,14 @@ class CameraStreamWorker:
                     delay=reconnect_delay,
                     attempt=self._metrics.reconnect_count,
                 )
+                if self._metrics.reconnect_count >= 3:
+                    self._metrics.state = StreamState.ERROR
+                    logger.warning(
+                        "Max reconnect attempts reached (3/3), marking ERROR state",
+                        camera=self.camera_name,
+                    )
+                    break
+
                 if self._stop_event.wait(timeout=reconnect_delay):
                     break
                 reconnect_delay = min(reconnect_delay * RECONNECT_BACKOFF_MULTIPLIER, MAX_RECONNECT_DELAY)

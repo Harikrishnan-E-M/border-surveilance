@@ -115,7 +115,9 @@ async def login(
     )
     user = result.scalars().first()
 
-    if not user or not _verify_password(body.password, user.hashed_password):
+    import asyncio
+    is_valid_pw = await asyncio.to_thread(_verify_password, body.password, user.hashed_password) if user else False
+    if not user or not is_valid_pw:
         logger.warning("Login failed: invalid credentials", email=body.email)
         raise AuthenticationError(message="Invalid email or password.")
 

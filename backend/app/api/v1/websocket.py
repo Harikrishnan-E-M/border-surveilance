@@ -52,7 +52,8 @@ async def _authenticate_ws(token: str | None) -> dict | None:
             settings.JWT_SECRET_KEY,
             algorithms=[settings.JWT_ALGORITHM],
         )
-        if payload.get("type") != "access":
+        token_type = payload.get("token_type") or payload.get("type")
+        if token_type != "access":
             return None
         if "sub" not in payload:
             return None
@@ -152,6 +153,10 @@ async def _subscribe_and_forward(
     """
     try:
         redis = await _get_redis()
+        if not redis:
+            while True:
+                await asyncio.sleep(5.0)
+            return
         pubsub = redis.pubsub()
         await pubsub.subscribe(redis_channel)
 

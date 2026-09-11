@@ -43,8 +43,8 @@ interface CameraItem {
 const addCameraSchema = z.object({
   name: z.string().min(1, 'Camera name is required'),
   location: z.string().min(1, 'Location is required'),
-  stream_url: z.string().url('Must be a valid URL'),
-  protocol: z.enum(['rtsp', 'rtmp', 'hls', 'webrtc']),
+  stream_url: z.string().min(1, 'Stream URL is required'),
+  protocol: z.string().default('http'),
   username: z.string().optional(),
   password: z.string().optional(),
 });
@@ -341,7 +341,10 @@ export default function CamerasPage() {
                     {...register('protocol')}
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                   >
+                    <option value="http">HTTP / MJPEG Stream</option>
                     <option value="rtsp">RTSP</option>
+                    <option value="onvif">ONVIF</option>
+                    <option value="usb">USB Device</option>
                     <option value="rtmp">RTMP</option>
                     <option value="hls">HLS</option>
                     <option value="webrtc">WebRTC</option>

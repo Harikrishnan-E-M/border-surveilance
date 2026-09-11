@@ -104,7 +104,9 @@ async def authenticate_user(
             code="INVALID_CREDENTIALS",
         )
 
-    if not _verify_password(password, user.hashed_password):
+    import asyncio
+    is_valid_pw = await asyncio.to_thread(_verify_password, password, user.hashed_password)
+    if not is_valid_pw:
         logger.warning("Authentication failed: bad password", email=email)
         raise AuthenticationError(
             message="Invalid email or password",

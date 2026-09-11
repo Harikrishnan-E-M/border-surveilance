@@ -81,8 +81,8 @@ class Settings(BaseSettings):
     # ── JWT / Authentication ──────────────────────────────────────────────
     JWT_SECRET_KEY: str = Field(default="change-me-jwt-secret", min_length=16)
     JWT_ALGORITHM: str = Field(default="HS256")
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, ge=1)
-    JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7, ge=1)
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=10080, ge=1)  # 7 days
+    JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=30, ge=1)
 
     # ── Encryption ────────────────────────────────────────────────────────
     ENCRYPTION_KEY: str = Field(

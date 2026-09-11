@@ -83,16 +83,6 @@ const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    title: 'Analytics',
-    items: [
-      { label: 'Footfall', href: '/dashboard/analytics/footfall', icon: Footprints },
-      { label: 'Heatmaps', href: '/dashboard/analytics/heatmap', icon: Flame },
-      { label: 'Attendance', href: '/dashboard/analytics/attendance', icon: CalendarCheck },
-      { label: 'PPE', href: '/dashboard/analytics/ppe', icon: HardHat },
-      { label: 'Patterns', href: '/dashboard/analytics/patterns', icon: TrendingUp },
-    ],
-  },
-  {
     title: 'AI Assistant',
     items: [
       { label: 'Copilot', href: '/dashboard/copilot', icon: Bot },

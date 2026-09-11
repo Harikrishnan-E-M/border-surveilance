@@ -53,6 +53,32 @@ def _get_ffmpeg_path() -> str:
     return path
 
 
+def open_opencv_capture(stream_url: str | int) -> cv2.VideoCapture:
+    """Open an OpenCV VideoCapture with optimal backend for OS.
+
+    For integer indices or numeric strings (e.g. 0, "0", "/dev/video0"),
+    uses DirectShow (cv2.CAP_DSHOW) on Windows for instant webcam opening without hangs.
+    """
+    import sys
+    import cv2
+
+    source: str | int = stream_url
+    if isinstance(stream_url, str):
+        url_str = stream_url.strip()
+        if url_str.isdigit():
+            source = int(url_str)
+        elif url_str.startswith("/dev/video"):
+            try:
+                source = int(url_str.replace("/dev/video", ""))
+            except ValueError:
+                pass
+
+    if isinstance(source, int) and sys.platform.startswith("win"):
+        return cv2.VideoCapture(source, cv2.CAP_DSHOW)
+
+    return cv2.VideoCapture(source)
+
+
 def _get_ffprobe_path() -> str:
     """Locate the ffprobe binary on the system.
 

@@ -62,6 +62,7 @@ class CameraCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     stream_url: str = Field(..., min_length=1, max_length=1024)
     protocol: str = Field(default="rtsp")
+    location: str | None = None
     location_description: str | None = None
     username: str | None = None
     password: str | None = None
@@ -186,7 +187,7 @@ def _require_manager(user: User) -> None:
 
 
 def _camera_to_response(camera: Camera) -> dict:
-    return CameraResponse(
+    res = CameraResponse(
         id=camera.id,
         org_id=camera.org_id,
         name=camera.name,
@@ -207,6 +208,9 @@ def _camera_to_response(camera: Camera) -> dict:
         created_at=camera.created_at,
         updated_at=camera.updated_at,
     ).model_dump(mode="json")
+    res["location"] = camera.location_description or ""
+    res["status"] = "online" if (camera.is_online or camera.is_active) else "offline"
+    return res
 
 
 # ---------------------------------------------------------------------------
@@ -314,12 +318,33 @@ async def create_camera(
             username_encrypted = body.username
             password_encrypted = body.password
 
+    proto_str = (body.protocol or "rtsp").lower().strip()
+    try:
+        proto_enum = StreamProtocol(proto_str)
+    except ValueError:
+        if proto_str.startswith("http"):
+            proto_enum = StreamProtocol.HTTP
+        else:
+            proto_enum = StreamProtocol.RTSP
+
+    rec_mode_str = (body.recording_mode or "event").lower().strip()
+    try:
+        rec_mode_enum = RecordingMode(rec_mode_str)
+    except ValueError:
+        rec_mode_enum = RecordingMode.EVENT
+
+    loc = body.location_description or body.location
+
+    stream_url_clean = body.stream_url.strip()
+    if (stream_url_clean.startswith("http://") or stream_url_clean.startswith("https://")) and ":5000" in stream_url_clean and not stream_url_clean.endswith("/video"):
+        stream_url_clean = stream_url_clean.rstrip("/") + "/video"
+
     camera = Camera(
         org_id=user.org_id,
         name=body.name,
-        stream_url=body.stream_url,
-        protocol=StreamProtocol(body.protocol),
-        location_description=body.location_description,
+        stream_url=stream_url_clean,
+        protocol=proto_enum,
+        location_description=loc,
         username_encrypted=username_encrypted,
         password_encrypted=password_encrypted,
         resolution=body.resolution,
@@ -329,7 +354,9 @@ async def create_camera(
         longitude=body.longitude,
         floor_plan_x=body.floor_plan_x,
         floor_plan_y=body.floor_plan_y,
-        recording_mode=RecordingMode(body.recording_mode),
+        recording_mode=rec_mode_enum,
+        is_active=True,
+        is_online=True,
     )
     db.add(camera)
     await db.flush()
@@ -924,13 +951,16 @@ async def discover_usb(
     user: User = Depends(_get_current_user),
 ) -> dict:
     """Probe /dev/video* devices using OpenCV and return working USB cameras."""
-    import cv2
+    import sys
+    from app.utils.video_utils import open_opencv_capture
 
     devices: list[dict] = []
-    for idx in range(0, 16, 2):  # Even-numbered devices are capture devices
-        dev_path = f"/dev/video{idx}"
+    # On Windows, probe 0..3; on Linux probe even indices 0..6
+    scan_indices = range(0, 4) if sys.platform.startswith("win") else range(0, 8, 2)
+    for idx in scan_indices:
+        dev_path = str(idx) if sys.platform.startswith("win") else f"/dev/video{idx}"
         try:
-            cap = cv2.VideoCapture(idx)
+            cap = open_opencv_capture(idx)
             if not cap.isOpened():
                 continue
             ret, frame = cap.read()
@@ -940,7 +970,7 @@ async def discover_usb(
                 devices.append({
                     "device_index": idx,
                     "device_path": dev_path,
-                    "name": f"USB Camera {idx // 2 + 1}",
+                    "name": f"Laptop/USB Camera {idx + 1}",
                     "resolution": f"{w}x{h}",
                     "fps": int(fps),
                     "stream_url": dev_path,
@@ -974,7 +1004,9 @@ async def discover_and_register_usb(
     db: AsyncSession = Depends(get_db_session),
 ) -> dict:
     """Discover USB cameras, skip already-registered ones, and create new camera records."""
+    import sys
     import cv2
+    from app.utils.video_utils import open_opencv_capture
 
     _require_manager(user)
 
@@ -990,10 +1022,11 @@ async def discover_and_register_usb(
     registered: list[dict] = []
     skipped: list[dict] = []
 
-    for idx in range(0, 16, 2):
-        dev_path = f"/dev/video{idx}"
+    scan_indices = range(0, 4) if sys.platform.startswith("win") else range(0, 8, 2)
+    for idx in scan_indices:
+        dev_path = str(idx) if sys.platform.startswith("win") else f"/dev/video{idx}"
         try:
-            cap = cv2.VideoCapture(idx)
+            cap = open_opencv_capture(idx)
             if not cap.isOpened():
                 continue
             ret, frame = cap.read()
@@ -1252,6 +1285,11 @@ async def stop_stream_endpoint(
 @router.get(
     "/{camera_id}/stream/mjpeg",
     summary="Live MJPEG video stream",
+    responses={404: {"model": ErrorResponse}},
+)
+@router.get(
+    "/{camera_id}/stream",
+    summary="Live MJPEG video stream alias",
     responses={404: {"model": ErrorResponse}},
 )
 async def mjpeg_stream(
