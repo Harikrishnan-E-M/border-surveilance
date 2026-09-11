@@ -892,14 +892,3 @@ Full reference of environment variables (see `.env.example`):
 
 ---
 
-## License
-
-This project is proprietary software developed by Sherin Joseph Roy. All rights reserved.
-
----
-
-## Author
-
-**Sherin Joseph Roy**
-
-GitHub: [Sherin-SEF-AI](https://github.com/Sherin-SEF-AI)
