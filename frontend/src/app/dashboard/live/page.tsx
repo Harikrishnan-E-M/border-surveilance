@@ -27,10 +27,11 @@ import { StreamPlayer } from '@/components/camera/stream-player';
 /** Build the MJPEG stream URL for a camera */
 function getMjpegUrl(cameraId: string, token: string | null): string {
   if (typeof window === 'undefined') return '';
-  const base = window.location.origin;
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
   const params = new URLSearchParams({ fps: '12', quality: '65' });
   if (token) params.set('token', token);
-  return `${base}/api/v1/cameras/${cameraId}/stream/mjpeg?${params.toString()}`;
+  return `${protocol}//${hostname}:8000/api/v1/cameras/${cameraId}/stream/mjpeg?${params.toString()}`;
 }
 
 interface CameraOption {
@@ -264,7 +265,7 @@ function CameraCell({
   useEffect(() => {
     if (!cell.cameraId || !accessToken) return;
 
-    const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/v1/ws/detections/${cell.cameraId}?token=${accessToken}`;
+    const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:8000/api/v1/ws/detections/${cell.cameraId}?token=${accessToken}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {

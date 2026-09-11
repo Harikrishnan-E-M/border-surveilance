@@ -201,7 +201,13 @@ class CameraStreamWorker:
         self._release_capture()
 
         try:
-            self._cap = cv2.VideoCapture(self.stream_url)
+            url_str = str(self.stream_url).strip()
+            if url_str.isdigit() or url_str in ("0", "1", "2", "3"):
+                source: int | str = int(url_str)
+            else:
+                source = self.stream_url
+
+            self._cap = cv2.VideoCapture(source)
             if self._cap.isOpened():
                 self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
                 return True

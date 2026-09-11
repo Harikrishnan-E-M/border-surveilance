@@ -122,7 +122,7 @@ class Settings(BaseSettings):
         description="Device for model inference: cuda, cpu, or tensorrt",
     )
     MODEL_DIR: str = Field(
-        default="/opt/visionai/models",
+        default="./models",
         description="Directory where ML model weights are stored",
     )
     MODEL_CONFIDENCE_THRESHOLD: float = Field(default=0.5, ge=0.0, le=1.0)

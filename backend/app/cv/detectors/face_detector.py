@@ -351,9 +351,11 @@ class FaceDetector:
             else:
                 kps_deltas = None
 
-            # Remove batch dimension
-            scores = scores[0]  # (N, 1)
-            bbox_deltas = bbox_deltas[0]  # (N, 4)
+            # Remove batch dimension if present
+            if scores.ndim == 3:
+                scores = scores[0]  # (N, 1)
+            if bbox_deltas.ndim == 3:
+                bbox_deltas = bbox_deltas[0]  # (N, 4)
 
             # Generate anchor centres for this stride
             anchor_centres = self._generate_anchor_centres(
@@ -371,9 +373,6 @@ class FaceDetector:
 
             # Decode landmarks
             if kps_deltas is not None:
-                kps = kps_deltas[0] if kps_deltas.ndim == 3 else kps_deltas
-                if kps.ndim == 3:
-                    kps = kps[0]
                 kps = kps_deltas[0] if kps_deltas.ndim == 3 else kps_deltas
                 landmarks = np.zeros((kps.shape[0], 5, 2), dtype=np.float32)
                 for k in range(5):

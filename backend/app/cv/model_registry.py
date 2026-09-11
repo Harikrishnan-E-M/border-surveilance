@@ -33,9 +33,9 @@ logger = structlog.stdlib.get_logger(__name__)
 # Paths are resolved relative to the configured MODEL_DIR.
 DEFAULT_MODEL_CATALOGUE: dict[str, str] = {
     "yolov8n": "yolov8n.onnx",
-    "yolov8n_pose": "yolov8n-pose.onnx",
-    "scrfd_2.5g": "scrfd_2.5g_bnkps.onnx",
-    "arcface_r100": "arcface_r100.onnx",
+    "yolov8n_pose": "yolov8m-pose.onnx",
+    "scrfd_2.5g": "det_10g.onnx",
+    "arcface_r100": "w600k_r50.onnx",
     "ppe_yolov8s": "ppe_yolov8s.onnx",
     "plate_detector": "plate_detect.onnx",
     "plate_ocr": "plate_ocr.onnx",
@@ -269,7 +269,14 @@ class ModelRegistry:
             dict[str, bool]: Mapping of model name to load success status.
         """
         if model_dir is None:
-            model_dir = Path("/opt/visionai/models")
+            from app.config import get_settings
+            configured = Path(get_settings().MODEL_DIR)
+            if configured.exists():
+                model_dir = configured
+            else:
+                # Fallback to local ./models directory in project root
+                local_dir = Path(__file__).resolve().parent.parent.parent.parent / "models"
+                model_dir = local_dir if local_dir.exists() else configured
         else:
             model_dir = Path(model_dir)
 

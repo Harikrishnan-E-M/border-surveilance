@@ -79,21 +79,25 @@ pnpm-debug.log*
 # ──────────────────────────────────────────────
 # ML Models and weights
 # ──────────────────────────────────────────────
-models/*.pt
-models/*.pth
-models/*.onnx
-models/*.engine
-models/*.trt
-models/*.bin
-models/*.safetensors
-models/*.h5
-models/*.pb
-models/*.tflite
-models/weights/
-models/cache/
-*.onnx
+models/*
+!models/.gitkeep
 *.pt
 *.pth
+*.onnx
+*.zip
+*.engine
+*.trt
+*.bin
+*.safetensors
+*.h5
+*.pb
+*.tflite
+models/weights/
+models/cache/
+*.db
+*.sqlite
+*.sqlite3
+visionai.db
 
 # ──────────────────────────────────────────────
 # Docker volumes and data

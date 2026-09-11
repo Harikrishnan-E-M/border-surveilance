@@ -99,6 +99,28 @@ async def init_and_seed():
                     session.add(u)
                     print(f"Created User: {email} / {pwd}")
 
+            # Default Laptop Webcam Camera
+            from app.models.camera import Camera, StreamProtocol, RecordingMode
+            res_cam = await session.execute(select(Camera).where(Camera.name == "Laptop Integrated Webcam"))
+            cam = res_cam.scalar_one_or_none()
+            if cam is None:
+                cam = Camera(
+                    id=uuid.uuid4(),
+                    org_id=org.id,
+                    name="Laptop Integrated Webcam",
+                    location_description="Built-in Laptop Web Camera",
+                    stream_url="0",
+                    protocol=StreamProtocol.USB,
+                    resolution="1280x720",
+                    fps=30,
+                    codec="h264",
+                    is_active=True,
+                    is_online=True,
+                    recording_mode=RecordingMode.EVENT,
+                )
+                session.add(cam)
+                print(f"Created Camera: {cam.name} (stream_url: 0)")
+
     print("\nInitialization Complete!")
     print("=" * 50)
     print("Default Login Credentials:")

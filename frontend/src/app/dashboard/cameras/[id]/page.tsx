@@ -126,10 +126,11 @@ type CameraSettingsForm = z.infer<typeof cameraSettingsSchema>;
 /** Build the MJPEG stream URL for a camera */
 function getMjpegUrl(cameraId: string, token: string | null): string {
   if (typeof window === 'undefined') return '';
-  const base = window.location.origin;
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
   const params = new URLSearchParams({ fps: '15', quality: '75' });
   if (token) params.set('token', token);
-  return `${base}/api/v1/cameras/${cameraId}/stream/mjpeg?${params.toString()}`;
+  return `${protocol}//${hostname}:8000/api/v1/cameras/${cameraId}/stream/mjpeg?${params.toString()}`;
 }
 
 export default function CameraDetailPage() {
