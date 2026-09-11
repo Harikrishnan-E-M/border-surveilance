@@ -8,16 +8,22 @@ import axios, {
 import { getAccessToken, refreshAccessToken, removeAccessToken } from "./auth";
 import type { ApiResponse, ErrorResponse } from "@/types/api";
 
-/**
- * Base API URL from environment variable or fallback to localhost.
- */
-const BASE_URL = "";
+function getDynamicBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    return `http://${hostname}:8000`;
+  }
+  return "http://localhost:8000";
+}
 
 /**
  * Axios instance pre-configured with base URL, timeout, and interceptors.
  */
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: getDynamicBaseUrl(),
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -53,10 +59,16 @@ function processQueue(error: unknown, token: string | null = null): void {
 }
 
 /**
- * Request interceptor: attach JWT access token from localStorage.
+ * Request interceptor: attach JWT access token from localStorage and update host dynamically.
  */
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    if (typeof window !== "undefined" && (!config.baseURL || config.baseURL.includes("localhost"))) {
+      const hostname = window.location.hostname;
+      if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+        config.baseURL = `http://${hostname}:8000`;
+      }
+    }
     const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -150,14 +162,37 @@ axiosInstance.interceptors.response.use(
     }
 
     // Normalize error response
+    let baseMessage =
+      error.response?.data?.message ||
+      error.response?.data?.detail ||
+      error.message ||
+      "An unexpected error occurred";
+
+    const rawErrors = error.response?.data?.errors;
+    let formattedMessage = baseMessage;
+
+    if (Array.isArray(rawErrors) && rawErrors.length > 0) {
+      const detailedMsgs = rawErrors
+        .map((e: any) => {
+          if (typeof e === "string") return e;
+          if (e && typeof e === "object") {
+            const fieldName = e.field ? e.field.replace(/^body\s*->\s*/, "") : "";
+            return fieldName ? `${fieldName}: ${e.message || "invalid value"}` : (e.message || "invalid value");
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (detailedMsgs.length > 0) {
+        formattedMessage = detailedMsgs.join("; ");
+      }
+    }
+
     const errorResponse: ErrorResponse = {
-      message:
-        error.response?.data?.message ||
-        error.response?.data?.detail ||
-        error.message ||
-        "An unexpected error occurred",
+      message: formattedMessage,
+      detail: error.response?.data?.detail || baseMessage,
       status: error.response?.status || 500,
-      errors: error.response?.data?.errors,
+      errors: rawErrors,
     };
 
     return Promise.reject(errorResponse);

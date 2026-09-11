@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 # ── Authentication ────────────────────────────────────────────────────────────
@@ -24,10 +24,17 @@ class LoginRequest(BaseModel):
         examples=["admin@acme.com"],
     )
     password: str = Field(
-        min_length=8,
-        description="Account password (minimum 8 characters).",
+        min_length=1,
+        description="Account password.",
         examples=["S3cureP@ssw0rd"],
     )
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def sanitize_email(cls, v: object) -> object:
+        if isinstance(v, str):
+            return v.strip().lower()
+        return v
 
 
 class LoginResponse(BaseModel):
@@ -84,6 +91,13 @@ class PasswordResetRequest(BaseModel):
         examples=["user@acme.com"],
     )
 
+    @field_validator("email", mode="before")
+    @classmethod
+    def sanitize_email(cls, v: object) -> object:
+        if isinstance(v, str):
+            return v.strip().lower()
+        return v
+
 
 class PasswordResetConfirm(BaseModel):
     """Complete the password-reset flow with the token received via email."""
@@ -121,6 +135,13 @@ class RegisterRequest(BaseModel):
         description="Email address for the admin account.",
         examples=["founder@newco.io"],
     )
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def sanitize_email(cls, v: object) -> object:
+        if isinstance(v, str):
+            return v.strip().lower()
+        return v
     password: str = Field(
         min_length=8,
         description="Account password (minimum 8 characters).",

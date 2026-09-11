@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import structlog
-from sqlalchemy import MetaData, event, text
+from sqlalchemy import MetaData, Uuid, event, text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
@@ -87,7 +87,7 @@ class Base(AsyncAttrs, DeclarativeBase, TimestampMixin):
     __abstract__ = True
 
     id: Mapped[uuid.UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
+        Uuid(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         unique=True,
@@ -121,22 +121,22 @@ class Base(AsyncAttrs, DeclarativeBase, TimestampMixin):
 # ── Engine & Session Factory ─────────────────────────────────────────────
 
 def _build_engine(settings: Any | None = None):
-    """Build and return the async engine.
-
-    The engine is configured with connection-pool tuning suitable for a
-    production workload.
-
-    Args:
-        settings: Optional settings override (primarily for testing).
-
-    Returns:
-        AsyncEngine: A configured SQLAlchemy async engine.
-    """
+    """Build and return the async engine."""
     if settings is None:
         settings = get_settings()
 
-    engine = create_async_engine(
-        settings.DATABASE_URL,
+    url = settings.DATABASE_URL
+    if url.startswith("sqlite"):
+        from sqlalchemy.pool import StaticPool
+        return create_async_engine(
+            url,
+            echo=settings.DB_ECHO,
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+
+    return create_async_engine(
+        url,
         echo=settings.DB_ECHO,
         pool_size=settings.DB_POOL_SIZE,
         max_overflow=settings.DB_MAX_OVERFLOW,
@@ -150,7 +150,6 @@ def _build_engine(settings: Any | None = None):
             },
         },
     )
-    return engine
 
 
 engine = _build_engine()

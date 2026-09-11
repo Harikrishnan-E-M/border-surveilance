@@ -22,6 +22,12 @@ export interface PaginatedResponse<T> {
   has_previous: boolean;
 }
 
+export interface ErrorDetailItem {
+  field?: string;
+  message: string;
+  type?: string;
+}
+
 /**
  * Standard error response from the API.
  */
@@ -29,7 +35,7 @@ export interface ErrorResponse {
   message: string;
   detail?: string;
   status: number;
-  errors?: Record<string, string[]>;
+  errors?: Record<string, string[]> | ErrorDetailItem[];
 }
 
 // ─── Enums (as string unions for TypeScript) ────────────────────────────────

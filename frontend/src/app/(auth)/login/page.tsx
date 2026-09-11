@@ -45,8 +45,9 @@ export default function LoginPage() {
       router.replace('/dashboard');
     } catch (error: any) {
       const message =
-        error?.response?.data?.detail ||
         error?.message ||
+        error?.detail ||
+        error?.response?.data?.detail ||
         'An unexpected error occurred. Please try again.';
       setServerError(message);
     }

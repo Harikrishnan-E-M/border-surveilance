@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "VisionAI"
     APP_ENV: str = Field(default="development", pattern="^(development|staging|production|testing)$")
     DEBUG: bool = False
-    LOG_LEVEL: str = Field(default="INFO", pattern="^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
+    LOG_LEVEL: str = Field(default="INFO", pattern="(?i)^(DEBUG|INFO|WARNING|ERROR|CRITICAL)$")
     SECRET_KEY: str = Field(default="change-me-in-production", min_length=16)
 
     # ── CORS ──────────────────────────────────────────────────────────────
@@ -96,7 +96,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = Field(default=587, ge=1, le=65535)
     SMTP_USERNAME: str = Field(default="")
     SMTP_PASSWORD: str = Field(default="")
-    SMTP_FROM_EMAIL: str = Field(default="noreply@visionai.local")
+    SMTP_FROM_EMAIL: str = Field(default="noreply@visionai.com")
     SMTP_FROM_NAME: str = Field(default="VisionAI")
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -183,13 +183,17 @@ class Settings(BaseSettings):
             raise ValueError("CORS_ORIGINS must be valid JSON") from exc
         return v
 
+    @field_validator("LOG_LEVEL")
+    @classmethod
+    def validate_log_level(cls, v: str) -> str:
+        """Convert log level to uppercase."""
+        return v.upper()
+
     @field_validator("MODEL_DIR")
     @classmethod
     def validate_model_dir(cls, v: str) -> str:
-        """Warn-only validation: ensure model directory path is absolute."""
-        if not Path(v).is_absolute():
-            raise ValueError("MODEL_DIR must be an absolute path")
-        return v
+        """Ensure model directory path is converted to an absolute path."""
+        return str(Path(v).resolve())
 
     @field_validator("MINIO_ENDPOINT")
     @classmethod

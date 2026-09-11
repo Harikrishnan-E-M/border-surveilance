@@ -62,7 +62,16 @@ export class WebSocketManager {
   private manualDisconnect: boolean = false;
 
   constructor(options: WebSocketManagerOptions = {}) {
-    const baseUrl = options.url || process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+    let baseUrl = options.url || process.env.NEXT_PUBLIC_WS_URL;
+    if (!baseUrl) {
+      if (typeof window !== "undefined") {
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const hostname = window.location.hostname;
+        baseUrl = `${protocol}//${hostname}:8000/api/v1/ws`;
+      } else {
+        baseUrl = "ws://localhost:8000/api/v1/ws";
+      }
+    }
 
     this.url = baseUrl;
     this.options = {

@@ -123,8 +123,7 @@ async def lifespan(app: FastAPI):
         await init_db()
         logger.info("Database initialised")
     except Exception as exc:
-        logger.error("Failed to initialise database", error=str(exc))
-        raise
+        logger.warning("Database initialisation failed -- verify DATABASE_URL in .env", error=str(exc))
 
     try:
         await init_redis(settings)

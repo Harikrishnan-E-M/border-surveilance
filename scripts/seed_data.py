@@ -52,7 +52,7 @@ async def seed_database() -> None:
                     id=uuid.uuid4(),
                     name="VisionAI Demo",
                     slug="visionai-demo",
-                    subscription_tier=SubscriptionTier.enterprise,
+                    subscription_tier=SubscriptionTier.ENTERPRISE.value,
                     max_cameras=100,
                     max_users=50,
                     timezone="Asia/Kolkata",
@@ -80,10 +80,10 @@ async def seed_database() -> None:
                     email=admin_email,
                     hashed_password=pwd_context.hash(admin_password),
                     full_name="System Administrator",
-                    role=UserRole.super_admin,
+                    role=UserRole.SUPER_ADMIN,
                     phone="+919999999999",
                     is_active=True,
-                    last_login=datetime.now(timezone.utc),
+                    last_login=datetime.now(timezone.utc).replace(tzinfo=None),
                 )
                 session.add(admin)
                 print(f"Created super admin: {admin_email} / {admin_password}")
@@ -95,19 +95,19 @@ async def seed_database() -> None:
                 {
                     "email": "manager@visionai.com",
                     "full_name": "Site Manager",
-                    "role": UserRole.org_admin,
+                    "role": UserRole.ORG_ADMIN,
                     "phone": "+919888888888",
                 },
                 {
                     "email": "operator@visionai.com",
                     "full_name": "Security Operator",
-                    "role": UserRole.operator,
+                    "role": UserRole.OPERATOR,
                     "phone": "+919777777777",
                 },
                 {
                     "email": "viewer@visionai.com",
                     "full_name": "Dashboard Viewer",
-                    "role": UserRole.viewer,
+                    "role": UserRole.VIEWER,
                     "phone": "+919666666666",
                 },
             ]

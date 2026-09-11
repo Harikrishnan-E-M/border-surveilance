@@ -44,8 +44,9 @@ export default function ForgotPasswordPage() {
       setIsSuccess(true);
     } catch (error: any) {
       const message =
-        error?.response?.data?.detail ||
         error?.message ||
+        error?.detail ||
+        error?.response?.data?.detail ||
         'Failed to send reset link. Please try again.';
       setServerError(message);
     }
