@@ -1,0 +1,254 @@
+[build-system]
+requires = ["setuptools>=72.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# =============================================================================
+# Project Metadata
+# =============================================================================
+
+[project]
+name = "visionai"
+version = "1.0.0"
+description = "Enterprise-grade AI-powered video surveillance and analytics platform"
+readme = "README.md"
+license = {text = "Proprietary"}
+requires-python = ">=3.11"
+authors = [
+    {name = "VisionAI Team"},
+]
+keywords = ["computer-vision", "surveillance", "analytics", "fastapi", "ai"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Multimedia :: Video",
+    "Typing :: Typed",
+]
+dependencies = [
+    "fastapi>=0.115.0,<1.0.0",
+    "uvicorn[standard]>=0.32.0,<1.0.0",
+    "sqlalchemy[asyncio]>=2.0.35,<3.0.0",
+    "asyncpg>=0.30.0,<1.0.0",
+    "alembic>=1.14.0,<2.0.0",
+    "pydantic>=2.9.0,<3.0.0",
+    "pydantic-settings>=2.6.0,<3.0.0",
+    "python-jose[cryptography]>=3.3.0,<4.0.0",
+    "passlib[bcrypt]>=1.7.4,<2.0.0",
+    "python-multipart>=0.0.12",
+    "celery[redis]>=5.4.0,<6.0.0",
+    "redis>=5.2.0,<6.0.0",
+    "minio>=7.2.0,<8.0.0",
+    "structlog>=24.4.0",
+    "python-onvif-zeep>=3.1.12",
+    "opencv-python-headless>=4.10.0",
+    "onnxruntime-gpu>=1.19.0",
+    "numpy>=1.26.0,<2.0.0",
+    "pillow>=10.4.0",
+    "scipy>=1.14.0",
+    "scikit-learn>=1.5.0",
+    "ultralytics>=8.3.0",
+    "insightface>=0.7.3",
+    "paddleocr>=2.8.0",
+    "httpx>=0.27.0,<1.0.0",
+    "websockets>=13.0,<14.0",
+    "python-dotenv>=1.0.1",
+    "weasyprint>=62.3",
+    "reportlab>=4.2.0",
+    "openpyxl>=3.1.5",
+    "matplotlib>=3.9.0",
+    "prometheus-client>=0.21.0",
+    "boto3>=1.35.0",
+    "aiofiles>=24.1.0",
+    "cryptography>=43.0.0",
+    "email-validator>=2.2.0",
+    "jinja2>=3.1.4",
+    "apscheduler>=3.10.4,<4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "pytest-xdist>=3.5.0",
+    "httpx>=0.27.0",
+    "factory-boy>=3.3.0",
+    "faker>=30.0.0",
+    "aiosqlite>=0.20.0",
+    "black>=24.10.0",
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+    "ipython>=8.28.0",
+]
+
+[project.urls]
+Homepage = "https://visionai.local"
+Documentation = "https://docs.visionai.local"
+Repository = "https://github.com/visionai/visionai"
+
+# =============================================================================
+# Tool Configuration
+# =============================================================================
+
+# ── Black (Code Formatter) ───────────────────────────────────────────────
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.venv
+  | __pycache__
+  | alembic/versions
+  | \.mypy_cache
+)/
+'''
+
+# ── Ruff (Linter + Formatter) ────────────────────────────────────────────
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T20",    # flake8-print
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "RUF",    # ruff-specific rules
+    "ASYNC",  # flake8-async
+    "S",      # flake8-bandit (security)
+]
+ignore = [
+    "E501",   # line too long (handled by black/formatter)
+    "B008",   # do not perform function calls in argument defaults (needed for Depends())
+    "S101",   # use of assert (allowed in tests)
+    "S105",   # possible hardcoded password (too many false positives with config defaults)
+    "S106",   # possible hardcoded password (same as above)
+    "RUF012", # mutable class variable (conflicts with SQLAlchemy column definitions)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S105", "S106", "T20"]
+"alembic/**/*.py" = ["E402", "I001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+force-single-line = false
+combine-as-imports = true
+lines-after-imports = 2
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ── Mypy (Static Type Checking) ──────────────────────────────────────────
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+namespace_packages = true
+explicit_package_bases = true
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
+
+[[tool.mypy.overrides]]
+module = [
+    "celery.*",
+    "minio.*",
+    "cv2.*",
+    "onnxruntime.*",
+    "insightface.*",
+    "paddleocr.*",
+    "ultralytics.*",
+    "onvif.*",
+    "weasyprint.*",
+    "reportlab.*",
+    "apscheduler.*",
+    "torch.*",
+]
+ignore_missing_imports = true
+
+# ── Pytest ────────────────────────────────────────────────────────────────
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "-v",
+    "--tb=short",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-fail-under=80",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks integration tests requiring external services",
+    "gpu: marks tests requiring GPU hardware",
+    "e2e: end-to-end tests",
+]
+
+# ── Coverage ──────────────────────────────────────────────────────────────
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/__main__.py",
+    "alembic/*",
+    "tests/*",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.",
+    "raise NotImplementedError",
+    "pass",
+    "\\.\\.\\.",
+]

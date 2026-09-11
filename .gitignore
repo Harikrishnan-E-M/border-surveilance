@@ -1,0 +1,157 @@
+# ================================================================
+# VisionAI .gitignore
+# ================================================================
+
+# ──────────────────────────────────────────────
+# Claude Code
+# ──────────────────────────────────────────────
+.claude/
+
+# ──────────────────────────────────────────────
+# Environment and secrets
+# ──────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.csr
+nginx/certs/
+secrets/
+
+# ──────────────────────────────────────────────
+# Python
+# ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python tools
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+*.cover
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ──────────────────────────────────────────────
+# Node.js / Next.js
+# ──────────────────────────────────────────────
+node_modules/
+.next/
+out/
+.nuxt/
+.cache/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ──────────────────────────────────────────────
+# ML Models and weights
+# ──────────────────────────────────────────────
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.engine
+models/*.trt
+models/*.bin
+models/*.safetensors
+models/*.h5
+models/*.pb
+models/*.tflite
+models/weights/
+models/cache/
+*.onnx
+*.pt
+*.pth
+
+# ──────────────────────────────────────────────
+# Docker volumes and data
+# ──────────────────────────────────────────────
+docker-volumes/
+postgres_data/
+redis_data/
+minio_data/
+*.tar.gz
+*.tar
+
+# ──────────────────────────────────────────────
+# IDE and editors
+# ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ──────────────────────────────────────────────
+# OS files
+# ──────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ──────────────────────────────────────────────
+# Logs
+# ──────────────────────────────────────────────
+logs/
+*.log
+celerybeat-schedule
+celerybeat.pid
+
+# ──────────────────────────────────────────────
+# Media and uploads (runtime data)
+# ──────────────────────────────────────────────
+uploads/
+recordings/
+snapshots/
+exports/
+tmp/
+temp/
+
+# ──────────────────────────────────────────────
+# Testing
+# ──────────────────────────────────────────────
+test-results/
+playwright-report/
+e2e-results/

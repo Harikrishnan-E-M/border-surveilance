@@ -1,0 +1,98 @@
+# ==============================================================================
+# VisionAI Edge Deployment - Dockerfile for NVIDIA Jetson Orin
+#
+# Builds a lightweight container that runs the VisionAI edge inference server
+# on Jetson Orin Nano / NX / AGX Orin devices.  The image includes:
+#   - ONNX Runtime with TensorRT and CUDA execution providers
+#   - A minimal FastAPI server for model loading, inference, and health
+#   - OpenCV with GStreamer support (provided by the L4T base image)
+#
+# Build:
+#   docker build -f docker/Dockerfile.edge -t visionai-edge:latest .
+#
+# Run:
+#   docker run --runtime nvidia --network host \
+#       -e CLOUD_API_URL=https://cloud.visionai.local/api/v1 \
+#       -e DEVICE_ID=<uuid> \
+#       -e API_KEY=<key> \
+#       -v /data/models:/app/models \
+#       visionai-edge:latest
+# ==============================================================================
+
+# ── Base: NVIDIA L4T PyTorch image for JetPack 6 / Orin ────────────────────
+FROM nvcr.io/nvidia/l4t-pytorch:r36.2.0-pth2.1-py3 AS base
+
+# Prevent interactive prompts during package install
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ── System dependencies ────────────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        curl \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Python dependencies ───────────────────────────────────────────────────
+WORKDIR /app
+
+COPY docker/edge-requirements.txt /tmp/edge-requirements.txt
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r /tmp/edge-requirements.txt && \
+    rm /tmp/edge-requirements.txt
+
+# Install ONNX Runtime with TensorRT execution provider
+# The l4t base already ships CUDA; we add the GPU-enabled ORT wheel
+RUN pip install --no-cache-dir \
+        onnxruntime-gpu \
+    || pip install --no-cache-dir \
+        onnxruntime
+
+# ── TensorRT optimisation environment ─────────────────────────────────────
+ENV ORT_TENSORRT_ENGINE_CACHE_ENABLE=1
+ENV ORT_TENSORRT_ENGINE_CACHE_PATH=/app/models/trt_cache
+ENV ORT_TENSORRT_FP16_ENABLE=1
+ENV ORT_TENSORRT_MAX_WORKSPACE_SIZE=2147483648
+ENV CUDA_MODULE_LOADING=LAZY
+
+# ── Copy application code ────────────────────────────────────────────────
+# Only the lightweight edge server and CV pipeline utilities are included.
+# The full backend (SQLAlchemy, Celery, etc.) is NOT shipped to the edge.
+COPY backend/app/edge_server.py /app/edge_server.py
+
+# ── Model volume mount point ─────────────────────────────────────────────
+RUN mkdir -p /app/models /app/models/trt_cache /app/data
+
+VOLUME ["/app/models"]
+
+# ── Runtime configuration ────────────────────────────────────────────────
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Edge server configuration (override at runtime)
+ENV EDGE_HOST=0.0.0.0
+ENV EDGE_PORT=8080
+ENV CLOUD_API_URL=""
+ENV DEVICE_ID=""
+ENV API_KEY=""
+ENV LOG_LEVEL=info
+ENV MODEL_DIR=/app/models
+ENV MAX_BATCH_SIZE=1
+ENV DEFAULT_CONFIDENCE=0.5
+
+EXPOSE 8080
+
+# ── Health check ─────────────────────────────────────────────────────────
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# ── Entrypoint ───────────────────────────────────────────────────────────
+CMD ["uvicorn", "edge_server:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8080", \
+     "--workers", "1", \
+     "--log-level", "info", \
+     "--access-log"]

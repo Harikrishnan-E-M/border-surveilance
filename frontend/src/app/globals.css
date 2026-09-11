@@ -1,0 +1,285 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* --- shadcn/ui Light Theme --- */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+
+    /* --- Severity Colors (Light) --- */
+    --severity-critical: 0 84% 60%;
+    --severity-critical-foreground: 0 0% 100%;
+    --severity-critical-bg: 0 84% 95%;
+    --severity-high: 25 95% 53%;
+    --severity-high-foreground: 0 0% 100%;
+    --severity-high-bg: 25 95% 95%;
+    --severity-medium: 45 93% 47%;
+    --severity-medium-foreground: 45 93% 12%;
+    --severity-medium-bg: 45 93% 95%;
+    --severity-low: 213 94% 55%;
+    --severity-low-foreground: 0 0% 100%;
+    --severity-low-bg: 213 94% 95%;
+    --severity-info: 215 14% 54%;
+    --severity-info-foreground: 0 0% 100%;
+    --severity-info-bg: 215 14% 95%;
+
+    /* --- Status Colors --- */
+    --status-online: 142 71% 45%;
+    --status-offline: 215 14% 54%;
+    --status-error: 0 84% 60%;
+    --status-maintenance: 45 93% 47%;
+
+    /* --- Layout --- */
+    --sidebar-width: 260px;
+    --header-height: 64px;
+
+    /* --- Font --- */
+    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+
+    /* --- Severity Colors (Dark) --- */
+    --severity-critical: 0 72% 51%;
+    --severity-critical-foreground: 0 0% 100%;
+    --severity-critical-bg: 0 72% 14%;
+    --severity-high: 25 85% 48%;
+    --severity-high-foreground: 0 0% 100%;
+    --severity-high-bg: 25 85% 14%;
+    --severity-medium: 45 83% 42%;
+    --severity-medium-foreground: 45 83% 90%;
+    --severity-medium-bg: 45 83% 14%;
+    --severity-low: 213 84% 50%;
+    --severity-low-foreground: 0 0% 100%;
+    --severity-low-bg: 213 84% 14%;
+    --severity-info: 215 14% 44%;
+    --severity-info-foreground: 0 0% 100%;
+    --severity-info-bg: 215 14% 14%;
+
+    /* --- Status Colors (Dark) --- */
+    --status-online: 142 61% 40%;
+    --status-offline: 215 14% 44%;
+    --status-error: 0 72% 51%;
+    --status-maintenance: 45 83% 42%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus-visible ring for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer components {
+  /* --- Custom Scrollbar --- */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-muted-foreground/20 hover:bg-muted-foreground/40;
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+  }
+
+  /* --- Hide scrollbar utility --- */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* --- Video stream container --- */
+  .video-container {
+    @apply relative overflow-hidden rounded-md bg-black;
+    aspect-ratio: 16 / 9;
+  }
+
+  .video-container video,
+  .video-container canvas {
+    @apply absolute inset-0 h-full w-full object-contain;
+  }
+
+  /* --- Detection overlay for bounding boxes --- */
+  .detection-overlay {
+    @apply pointer-events-none absolute inset-0;
+  }
+
+  .detection-box {
+    @apply absolute border-2;
+  }
+
+  .detection-label {
+    @apply absolute -top-6 left-0 whitespace-nowrap rounded-sm px-1 py-0.5 text-2xs font-medium text-white;
+  }
+
+  /* --- Grid layouts for camera views --- */
+  .camera-grid-1x1 {
+    @apply grid grid-cols-1 grid-rows-1 gap-1;
+  }
+
+  .camera-grid-2x2 {
+    @apply grid grid-cols-2 grid-rows-2 gap-1;
+  }
+
+  .camera-grid-3x3 {
+    @apply grid grid-cols-3 grid-rows-3 gap-1;
+  }
+
+  .camera-grid-4x4 {
+    @apply grid grid-cols-4 grid-rows-4 gap-1;
+  }
+
+  /* --- Alert severity badges --- */
+  .severity-badge-critical {
+    @apply bg-severity-critical-bg text-severity-critical;
+  }
+
+  .severity-badge-high {
+    @apply bg-severity-high-bg text-severity-high;
+  }
+
+  .severity-badge-medium {
+    @apply bg-severity-medium-bg text-severity-medium;
+  }
+
+  .severity-badge-low {
+    @apply bg-severity-low-bg text-severity-low;
+  }
+
+  .severity-badge-info {
+    @apply bg-severity-info-bg text-severity-info;
+  }
+
+  /* --- Shimmer loading effect --- */
+  .shimmer {
+    @apply animate-shimmer;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.08) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 2000px 100%;
+  }
+
+  /* --- Status indicator dot --- */
+  .status-dot {
+    @apply inline-block h-2 w-2 rounded-full;
+  }
+
+  .status-dot-online {
+    @apply bg-status-online;
+  }
+
+  .status-dot-offline {
+    @apply bg-status-offline;
+  }
+
+  .status-dot-error {
+    @apply bg-status-error;
+  }
+
+  .status-dot-maintenance {
+    @apply bg-status-maintenance;
+  }
+}
+
+@layer utilities {
+  /* --- Glass morphism --- */
+  .glass {
+    @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+  }
+
+  .glass-dark {
+    @apply border border-black/10 bg-black/5 backdrop-blur-xl;
+  }
+
+  /* --- Text gradient --- */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent;
+  }
+
+  /* --- Truncate multi-line --- */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

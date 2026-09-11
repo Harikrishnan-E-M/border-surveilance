@@ -1,0 +1,86 @@
+# ──────────────────────────────────────────────
+# VisionAI Celery Worker
+# Same base as API but runs Celery worker process
+# Includes OpenCV and ML runtime dependencies
+# ──────────────────────────────────────────────
+
+# Stage 1: Build dependencies
+FROM python:3.11-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    libgl1 \
+    libglib2.0-0t64 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# Stage 2: Production image
+FROM python:3.11-slim AS production
+
+LABEL maintainer="VisionAI Team"
+LABEL description="VisionAI Celery Worker for CV Processing"
+
+# Install runtime dependencies (includes full OpenCV support)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    libgl1 \
+    libglib2.0-0t64 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libv4l-0 \
+    libavcodec-extra \
+    libavformat-dev \
+    libswscale-dev \
+    ffmpeg \
+    wget \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user for security
+RUN groupadd -r visionai && useradd -r -g visionai -d /app -s /sbin/nologin visionai
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+
+WORKDIR /app
+
+# Copy backend application code
+COPY backend/ ./
+
+# Create directories for models and temporary processing files
+RUN mkdir -p /app/models /tmp/visionai && \
+    chown -R visionai:visionai /app /tmp/visionai
+
+USER visionai
+
+# Environment defaults
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    CELERY_WORKER_CONCURRENCY=2 \
+    CELERY_WORKER_MAX_TASKS_PER_CHILD=100 \
+    CELERY_WORKER_PREFETCH_MULTIPLIER=1 \
+    CV_MODELS_PATH=/app/models \
+    CV_USE_GPU=false
+
+# Run Celery worker
+# -Q: queues to consume from (all defined queues)
+# --max-tasks-per-child: prevent memory leaks from long-running CV tasks
+# -P: prefork pool for CPU-bound CV work
+CMD ["celery", "-A", "app.workers.celery_app", "worker", \
+     "--loglevel=info", \
+     "--concurrency=2", \
+     "--max-tasks-per-child=100", \
+     "--prefetch-multiplier=1", \
+     "-Q", "default,video,alerts,analytics,reports,maintenance,federation,edge", \
+     "-P", "prefork", \
+     "--without-heartbeat", \
+     "--without-mingle", \
+     "--without-gossip"]
