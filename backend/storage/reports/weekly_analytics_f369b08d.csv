@@ -1,0 +1,19 @@
+IBVAP Border Analytics Report
+Title,Weekly Analytics Report
+Period,2026-09-01,to,2026-09-12
+Generated,2026-09-12T05:22:18.158191+00:00
+
+BORDER INCIDENT SUMMARY
+Total Events,255
+
+Severity,Count
+high,155
+info,32
+medium,68
+
+Event Type,Count
+anpr_unknown,43
+face_unknown,100
+intrusion_detection,100
+loitering,12
+

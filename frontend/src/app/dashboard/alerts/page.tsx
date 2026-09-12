@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {
@@ -11,18 +11,15 @@ import {
   ChevronUp,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   AlertTriangle,
   Info,
   Loader2,
-  Camera,
-  Clock,
   Image as ImageIcon,
   RefreshCw,
   CheckCheck,
   X,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -121,16 +118,22 @@ export default function AlertsPage() {
       if (filters.date_to) params.date_to = filters.date_to;
       if (filters.search) params.search = filters.search;
 
-      const res = await apiClient.get('/api/v1/alerts', { params });
-      const raw = res.data;
-      // Handle both unwrapped array and paginated {items/data, total} formats
-      if (Array.isArray(raw)) {
-        return { items: raw, total: raw.length };
+      const res: any = await apiClient.get('/api/v1/alerts', { params });
+      let items: any[] = [];
+      let total = 0;
+
+      if (Array.isArray(res)) {
+        items = res;
+        total = res.length;
+      } else if (res && Array.isArray(res.data)) {
+        items = res.data;
+        total = res.total ?? res.data.length;
+      } else if (res && Array.isArray(res.items)) {
+        items = res.items;
+        total = res.total ?? res.items.length;
       }
-      return {
-        items: raw.items || raw.data || [],
-        total: raw.total ?? (raw.items || raw.data || []).length,
-      };
+
+      return { items, total };
     },
     refetchInterval: 5000,
   });
@@ -142,7 +145,7 @@ export default function AlertsPage() {
   // Update unread count — use alertsData.items directly to avoid unstable dependency
   useEffect(() => {
     if (alertsData) {
-      const newCount = alertsData.items.filter((a) => a.status === 'new').length;
+      const newCount = alertsData.items.filter((a: { status: string }) => a.status === 'new').length;
       setUnreadCount(newCount);
     }
   }, [alertsData, setUnreadCount]);
@@ -199,7 +202,7 @@ export default function AlertsPage() {
     if (selectedAlerts.size === alerts.length) {
       setSelectedAlerts(new Set());
     } else {
-      setSelectedAlerts(new Set(alerts.map((a) => a.id)));
+      setSelectedAlerts(new Set(alerts.map((a: Alert) => a.id)));
     }
   };
 
@@ -546,7 +549,7 @@ export default function AlertsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {alerts.map((alert) => (
+                  {alerts.map((alert: Alert) => (
                     <>
                       <tr
                         key={alert.id}
@@ -575,7 +578,7 @@ export default function AlertsPage() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">
-                          {alert.type.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                          {alert.type.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                         </td>
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
                           {alert.camera_name}

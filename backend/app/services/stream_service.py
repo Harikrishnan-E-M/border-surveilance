@@ -508,13 +508,10 @@ async def mjpeg_frame_generator(
             for alert_type_val, title, description in alerts_to_trigger:
                 asyncio.create_task(_trigger_alert_for_detection(camera_id, alert_type_val, title, description))
         else:
-            if last_jpg_bytes is not None:
-                jpg_bytes = last_jpg_bytes
-            else:
-                placeholder = np.zeros((480, 640, 3), dtype=np.uint8)
-                cv2.putText(placeholder, "CONNECTING TO CAMERA STREAM...", (120, 240), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
-                _, buf = cv2.imencode(".jpg", placeholder, [cv2.IMWRITE_JPEG_QUALITY, 50])
-                jpg_bytes = buf.tobytes()
+            placeholder = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(placeholder, "RECONNECTING TO CAMERA STREAM...", (110, 240), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+            _, buf = cv2.imencode(".jpg", placeholder, [cv2.IMWRITE_JPEG_QUALITY, 50])
+            jpg_bytes = buf.tobytes()
 
         yield (
             b"--frame\r\n"
@@ -656,4 +653,11 @@ async def _trigger_alert_for_detection(
             logger.info("Live detection alert created and dispatched", title=title)
     except Exception as exc:
         logger.error("Failed to trigger live detection alert", error=str(exc))
+
+
+async def generate_playback_url(file_path: str, recording_id: str | None = None) -> str:
+    """Generate a playback URL for a recording file."""
+    if recording_id:
+        return f"/api/v1/recordings/{recording_id}/stream"
+    return f"/api/v1/recordings/stream?path={file_path}"
 

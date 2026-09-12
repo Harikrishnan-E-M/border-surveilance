@@ -16,17 +16,9 @@ import {
   Pencil,
   Trash2,
   TestTube2,
-  Power,
-  PowerOff,
   AlertCircle,
   CheckCircle2,
-  X,
   Settings,
-  Hash,
-  Link2,
-  Shield,
-  Key,
-  Globe,
   Users,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -89,7 +81,7 @@ interface AlertTypePreference {
   channel_ids: string[];
 }
 
-interface EmailConfig {
+export interface EmailConfig {
   smtp_server: string;
   smtp_port: string;
   smtp_username: string;
@@ -97,24 +89,24 @@ interface EmailConfig {
   from_address: string;
 }
 
-interface SmsConfig {
+export interface SmsConfig {
   twilio_sid: string;
   twilio_auth_token: string;
   from_number: string;
 }
 
-interface WhatsAppConfig {
+export interface WhatsAppConfig {
   twilio_sid: string;
   twilio_auth_token: string;
   from_number: string;
 }
 
-interface TelegramConfig {
+export interface TelegramConfig {
   bot_token: string;
   chat_id: string;
 }
 
-interface WebhookConfig {
+export interface WebhookConfig {
   url: string;
   secret: string;
   headers: string;

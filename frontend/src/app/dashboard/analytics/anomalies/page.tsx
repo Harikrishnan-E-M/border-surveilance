@@ -33,7 +33,6 @@ import {
   ArrowDown,
   CalendarDays,
   Info,
-  ChevronDown,
   Zap,
   Database,
 } from 'lucide-react';

@@ -239,6 +239,8 @@ async def list_cameras(
         query = query.where(Camera.name.ilike(f"%{search}%"))
     if is_active is not None:
         query = query.where(Camera.is_active == is_active)
+    else:
+        query = query.where(Camera.is_active.is_(True))
     if is_online is not None:
         query = query.where(Camera.is_online == is_online)
     if protocol:
@@ -687,7 +689,18 @@ async def delete_camera(
     except (ImportError, Exception) as exc:
         logger.warning("Failed to stop stream on camera delete", error=str(exc))
 
-    logger.info("Camera soft-deleted", camera_id=str(camera.id))
+    try:
+        await db.delete(camera)
+        await db.flush()
+    except Exception as exc:
+        logger.warning("Hard delete failed, marking camera inactive", error=str(exc))
+        await db.rollback()
+        camera.is_active = False
+        camera.is_online = False
+        db.add(camera)
+        await db.flush()
+
+    logger.info("Camera deleted", camera_id=str(camera.id))
 
     return {
         "status": "success",
@@ -789,6 +802,41 @@ async def get_snapshot(
             "timestamp": snapshot.get("timestamp", datetime.now(timezone.utc).isoformat()),
         },
     }
+
+
+@router.get(
+    "/{camera_id}/snapshot.jpg",
+    summary="Get current camera snapshot JPEG image directly",
+)
+async def get_snapshot_jpeg(
+    camera_id: uuid.UUID,
+    token: str | None = Query(None),
+    db: AsyncSession = Depends(get_db_session),
+):
+    """Serve camera snapshot directly as a JPEG image file."""
+    import base64
+    import io
+    from fastapi.responses import StreamingResponse
+
+    try:
+        from app.services.stream_service import capture_snapshot
+        snapshot = await capture_snapshot(camera_id=str(camera_id))
+        url_str = snapshot.get("url", "")
+        if url_str and "base64," in url_str:
+            b64_data = url_str.split("base64,")[1]
+            jpg_bytes = base64.b64decode(b64_data)
+            return StreamingResponse(io.BytesIO(jpg_bytes), media_type="image/jpeg")
+    except Exception:
+        pass
+
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+    <rect width="640" height="360" fill="#0f172a"/>
+    <rect x="2" y="2" width="636" height="356" fill="none" stroke="#0284c7" stroke-width="2"/>
+    <text x="320" y="160" fill="#0284c7" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle">IBVAP BORDER SURVEILLANCE SNAPSHOT</text>
+    <text x="320" y="200" fill="#94a3b8" font-family="sans-serif" font-size="14" text-anchor="middle">CAMERA ID: {str(camera_id)[:8]}</text>
+    <text x="320" y="230" fill="#22c55e" font-family="sans-serif" font-size="12" text-anchor="middle">LIVE ANPR &amp; FRS MONITORING ACTIVE</text>
+    </svg>"""
+    return StreamingResponse(io.BytesIO(svg.encode("utf-8")), media_type="image/svg+xml")
 
 
 # ---------------------------------------------------------------------------
@@ -942,20 +990,12 @@ async def discover_onvif(
 # POST /discover-usb - Discover USB cameras
 # ---------------------------------------------------------------------------
 
-@router.post(
-    "/discover-usb",
-    response_model=SuccessResponse,
-    summary="Discover USB cameras attached to the server",
-)
-async def discover_usb(
-    user: User = Depends(_get_current_user),
-) -> dict:
-    """Probe /dev/video* devices using OpenCV and return working USB cameras."""
+def _probe_usb_devices_sync() -> list[dict]:
     import sys
+    import cv2
     from app.utils.video_utils import open_opencv_capture
 
     devices: list[dict] = []
-    # On Windows, probe 0..3; on Linux probe even indices 0..6
     scan_indices = range(0, 4) if sys.platform.startswith("win") else range(0, 8, 2)
     for idx in scan_indices:
         dev_path = str(idx) if sys.platform.startswith("win") else f"/dev/video{idx}"
@@ -964,7 +1004,7 @@ async def discover_usb(
             if not cap.isOpened():
                 continue
             ret, frame = cap.read()
-            if ret:
+            if ret and frame is not None:
                 h, w = frame.shape[:2]
                 fps = cap.get(cv2.CAP_PROP_FPS) or 30
                 devices.append({
@@ -978,6 +1018,20 @@ async def discover_usb(
             cap.release()
         except Exception:
             continue
+    return devices
+
+
+@router.post(
+    "/discover-usb",
+    response_model=SuccessResponse,
+    summary="Discover USB cameras attached to the server",
+)
+async def discover_usb(
+    user: User = Depends(_get_current_user),
+) -> dict:
+    """Probe /dev/video* devices using OpenCV offloaded to a worker thread and return working USB cameras."""
+    import asyncio
+    devices = await asyncio.to_thread(_probe_usb_devices_sync)
 
     return {
         "status": "success",
@@ -1004,9 +1058,7 @@ async def discover_and_register_usb(
     db: AsyncSession = Depends(get_db_session),
 ) -> dict:
     """Discover USB cameras, skip already-registered ones, and create new camera records."""
-    import sys
-    import cv2
-    from app.utils.video_utils import open_opencv_capture
+    import asyncio
 
     _require_manager(user)
 
@@ -1019,50 +1071,41 @@ async def discover_and_register_usb(
     )
     existing_urls = set(existing_result.scalars().all())
 
+    # Probe devices off the main asyncio event loop thread
+    probed_devices = await asyncio.to_thread(_probe_usb_devices_sync)
+
     registered: list[dict] = []
     skipped: list[dict] = []
 
-    scan_indices = range(0, 4) if sys.platform.startswith("win") else range(0, 8, 2)
-    for idx in scan_indices:
-        dev_path = str(idx) if sys.platform.startswith("win") else f"/dev/video{idx}"
-        try:
-            cap = open_opencv_capture(idx)
-            if not cap.isOpened():
-                continue
-            ret, frame = cap.read()
-            if not ret:
-                cap.release()
-                continue
+    for dev in probed_devices:
+        dev_path = dev["device_path"]
+        idx = dev["device_index"]
 
-            h, w = frame.shape[:2]
-            fps_detected = int(cap.get(cv2.CAP_PROP_FPS) or 30)
-            cap.release()
-
-            if dev_path in existing_urls:
-                skipped.append({"device_path": dev_path, "reason": "already registered"})
-                continue
-
-            camera = Camera(
-                org_id=user.org_id,
-                name=f"USB Camera {idx // 2 + 1}",
-                stream_url=dev_path,
-                protocol=StreamProtocol.USB,
-                location_description="Local USB webcam",
-                resolution=f"{w}x{h}",
-                fps=fps_detected if fps_detected > 0 else 30,
-                recording_mode=RecordingMode.EVENT,
-                is_active=True,
-                is_online=True,
-            )
-            db.add(camera)
-            await db.flush()
-
-            registered.append(_camera_to_response(camera))
-            logger.info("USB camera registered", camera_id=str(camera.id), device=dev_path)
-
-        except Exception as exc:
-            logger.warning("Failed to probe USB device", device=dev_path, error=str(exc))
+        if dev_path in existing_urls:
+            skipped.append({"device_path": dev_path, "reason": "already registered"})
             continue
+
+        res_parts = dev["resolution"].split("x")
+        w, h = res_parts[0], res_parts[1] if len(res_parts) > 1 else "480"
+        fps_detected = dev["fps"]
+
+        camera = Camera(
+            org_id=user.org_id,
+            name=f"USB Camera {idx // 2 + 1}",
+            stream_url=dev_path,
+            protocol=StreamProtocol.USB,
+            location_description="Local USB webcam",
+            resolution=f"{w}x{h}",
+            fps=fps_detected if fps_detected > 0 else 30,
+            recording_mode=RecordingMode.EVENT,
+            is_active=True,
+            is_online=True,
+        )
+        db.add(camera)
+        await db.flush()
+
+        registered.append(_camera_to_response(camera))
+        logger.info("USB camera registered", camera_id=str(camera.id), device=dev_path)
 
     return {
         "status": "success",

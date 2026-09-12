@@ -32,8 +32,8 @@ async def discover_devices(timeout: int = 5) -> list[dict[str, Any]]:
         wsd.start()
 
         try:
-            import time
-            time.sleep(timeout)
+            import asyncio
+            await asyncio.sleep(timeout)
             services = wsd.searchServices()
 
             for service in services:

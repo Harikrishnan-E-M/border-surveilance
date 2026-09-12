@@ -6,7 +6,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { getAccessToken, refreshAccessToken, removeAccessToken } from "./auth";
-import type { ApiResponse, ErrorResponse } from "@/types/api";
+import type { ErrorResponse } from "@/types/api";
 
 function getDynamicBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_API_BASE_URL) {
@@ -92,6 +92,10 @@ axiosInstance.interceptors.response.use(
     if (
       body &&
       typeof body === "object" &&
+      typeof Blob !== "undefined" &&
+      !(body instanceof Blob) &&
+      typeof ArrayBuffer !== "undefined" &&
+      !(body instanceof ArrayBuffer) &&
       !Array.isArray(body) &&
       "status" in body &&
       "data" in body
@@ -112,8 +116,15 @@ axiosInstance.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // Handle 401 Unauthorized - attempt token refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const requestUrl = originalRequest?.url || "";
+    const isAuthEndpoint =
+      requestUrl.includes("/auth/login") ||
+      requestUrl.includes("/auth/refresh") ||
+      requestUrl.includes("/auth/register") ||
+      requestUrl.endsWith("/login");
+
+    // Handle 401 Unauthorized - attempt token refresh (except for auth endpoints)
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         // Queue subsequent 401 requests while refreshing
         return new Promise((resolve, reject) => {
@@ -143,8 +154,8 @@ axiosInstance.interceptors.response.use(
         } else {
           processQueue(new Error("Token refresh failed"));
           removeAccessToken();
-          // Redirect to login if in browser
-          if (typeof window !== "undefined") {
+          // Redirect to login if in browser and not already on /login
+          if (typeof window !== "undefined" && window.location.pathname !== "/login") {
             window.location.href = "/login";
           }
           return Promise.reject(error);
@@ -152,7 +163,7 @@ axiosInstance.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
         removeAccessToken();
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && window.location.pathname !== "/login") {
           window.location.href = "/login";
         }
         return Promise.reject(refreshError);

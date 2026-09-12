@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { format, subDays } from 'date-fns';
 import {
   Search,
   Image as ImageIcon,
@@ -17,7 +16,6 @@ import {
   HardDrive,
   Sparkles,
   Video,
-  Tag,
   ChevronRight,
   RefreshCw,
   Mic,
@@ -30,13 +28,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiClient } from '@/lib/api-client';
 import { cn, formatDate, formatRelativeTime } from '@/lib/utils';

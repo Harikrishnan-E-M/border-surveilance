@@ -1,0 +1,268 @@
+{
+  "9a1798c2-862a-497c-896c-83da7b9ac213": {
+    "id": "9a1798c2-862a-497c-896c-83da7b9ac213",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Persistent Border Daily Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 1759,
+    "generated_at": "2026-09-11T23:14:54.324225+00:00",
+    "download_url": "/api/v1/reports/9a1798c2-862a-497c-896c-83da7b9ac213/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_9a1798c2.pdf",
+    "parameters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-12"
+    }
+  },
+  "f4b0c970-4d20-4b9a-9b20-e44a21047d9f": {
+    "id": "f4b0c970-4d20-4b9a-9b20-e44a21047d9f",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Persistent Border Daily Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 1759,
+    "generated_at": "2026-09-11T23:14:57.604811+00:00",
+    "download_url": "/api/v1/reports/f4b0c970-4d20-4b9a-9b20-e44a21047d9f/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_f4b0c970.pdf",
+    "parameters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-12"
+    }
+  },
+  "d9114304-153e-4508-86a9-97c34ca985c2": {
+    "id": "d9114304-153e-4508-86a9-97c34ca985c2",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "22c67250-e52f-4db9-a50a-6852f88d5f11",
+    "name": "Daily Summary Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2268,
+    "generated_at": "2026-09-12T04:28:43.573807+00:00",
+    "download_url": "/api/v1/reports/d9114304-153e-4508-86a9-97c34ca985c2/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_d9114304.pdf",
+    "parameters": {
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-12"
+    }
+  },
+  "a246daba-2fb3-4857-a4f0-d47220dd4c08": {
+    "id": "a246daba-2fb3-4857-a4f0-d47220dd4c08",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "22c67250-e52f-4db9-a50a-6852f88d5f11",
+    "name": "Vehicle Activity Log",
+    "type": "vehicle_log",
+    "template_id": "vehicle_log",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2273,
+    "generated_at": "2026-09-12T04:29:22.266793+00:00",
+    "download_url": "/api/v1/reports/a246daba-2fb3-4857-a4f0-d47220dd4c08/download",
+    "content_type": "application/pdf",
+    "filename": "vehicle_log_a246daba.pdf",
+    "parameters": {
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-12"
+    }
+  },
+  "ae42bb1d-20f4-485b-a0d3-fcd29184fc7b": {
+    "id": "ae42bb1d-20f4-485b-a0d3-fcd29184fc7b",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "22c67250-e52f-4db9-a50a-6852f88d5f11",
+    "name": "Incident Report",
+    "type": "incident_report",
+    "template_id": "incident_report",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2259,
+    "generated_at": "2026-09-12T04:34:53.208017+00:00",
+    "download_url": "/api/v1/reports/ae42bb1d-20f4-485b-a0d3-fcd29184fc7b/download",
+    "content_type": "application/pdf",
+    "filename": "incident_report_ae42bb1d.pdf",
+    "parameters": {
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-12"
+    }
+  },
+  "fe269e12-70f5-4a08-a685-33348a249b37": {
+    "id": "fe269e12-70f5-4a08-a685-33348a249b37",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "22c67250-e52f-4db9-a50a-6852f88d5f11",
+    "name": "Daily Summary Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2268,
+    "generated_at": "2026-09-12T04:45:58.546137+00:00",
+    "download_url": "/api/v1/reports/fe269e12-70f5-4a08-a685-33348a249b37/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_fe269e12.pdf",
+    "parameters": {
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-12"
+    }
+  },
+  "89f0bac7-ff70-44f5-a12f-b528c1a955d9": {
+    "id": "89f0bac7-ff70-44f5-a12f-b528c1a955d9",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Daily Summary Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2269,
+    "generated_at": "2026-09-12T05:16:55.461172+00:00",
+    "download_url": "/api/v1/reports/89f0bac7-ff70-44f5-a12f-b528c1a955d9/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_89f0bac7.pdf",
+    "parameters": {
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-12"
+    }
+  },
+  "7e92b463-800f-4316-9bbd-7c5a216397f3": {
+    "id": "7e92b463-800f-4316-9bbd-7c5a216397f3",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "22c67250-e52f-4db9-a50a-6852f88d5f11",
+    "name": "Daily Summary Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2269,
+    "generated_at": "2026-09-12T05:17:32.182434+00:00",
+    "download_url": "/api/v1/reports/7e92b463-800f-4316-9bbd-7c5a216397f3/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_7e92b463.pdf",
+    "parameters": {
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-12"
+    }
+  },
+  "e2923959-c706-45ba-9752-4a59978b370d": {
+    "id": "e2923959-c706-45ba-9752-4a59978b370d",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Daily Summary Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2272,
+    "generated_at": "2026-09-12T05:21:31.895970+00:00",
+    "download_url": "/api/v1/reports/e2923959-c706-45ba-9752-4a59978b370d/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_e2923959.pdf",
+    "parameters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-12"
+    }
+  },
+  "6c510369-b52b-42dc-833b-7eb07fbbaa1a": {
+    "id": "6c510369-b52b-42dc-833b-7eb07fbbaa1a",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Daily Summary Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2271,
+    "generated_at": "2026-09-12T05:21:52.728729+00:00",
+    "download_url": "/api/v1/reports/6c510369-b52b-42dc-833b-7eb07fbbaa1a/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_6c510369.pdf",
+    "parameters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-12"
+    }
+  },
+  "0e560c83-8049-4ab9-8453-8cc667ce4aa4": {
+    "id": "0e560c83-8049-4ab9-8453-8cc667ce4aa4",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Weekly Analytics Report",
+    "type": "weekly_analytics",
+    "template_id": "weekly_analytics",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2279,
+    "generated_at": "2026-09-12T05:22:09.093026+00:00",
+    "download_url": "/api/v1/reports/0e560c83-8049-4ab9-8453-8cc667ce4aa4/download",
+    "content_type": "application/pdf",
+    "filename": "weekly_analytics_0e560c83.pdf",
+    "parameters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-12"
+    }
+  },
+  "116fa999-722a-452d-879b-f1cb2fd99028": {
+    "id": "116fa999-722a-452d-879b-f1cb2fd99028",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Weekly Analytics Report",
+    "type": "weekly_analytics",
+    "template_id": "weekly_analytics",
+    "format": "xlsx",
+    "status": "completed",
+    "size_bytes": 4963,
+    "generated_at": "2026-09-12T05:22:13.628176+00:00",
+    "download_url": "/api/v1/reports/116fa999-722a-452d-879b-f1cb2fd99028/download",
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "filename": "weekly_analytics_116fa999.xlsx",
+    "parameters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-12"
+    }
+  },
+  "f369b08d-21fe-4c8c-9143-8cb2f7c33b73": {
+    "id": "f369b08d-21fe-4c8c-9143-8cb2f7c33b73",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "e3ad183a-e2a8-465e-983d-0c67dfcbfaf0",
+    "name": "Weekly Analytics Report",
+    "type": "weekly_analytics",
+    "template_id": "weekly_analytics",
+    "format": "csv",
+    "status": "completed",
+    "size_bytes": 328,
+    "generated_at": "2026-09-12T05:22:18.158191+00:00",
+    "download_url": "/api/v1/reports/f369b08d-21fe-4c8c-9143-8cb2f7c33b73/download",
+    "content_type": "text/csv",
+    "filename": "weekly_analytics_f369b08d.csv",
+    "parameters": {
+      "start_date": "2026-09-01",
+      "end_date": "2026-09-12"
+    }
+  },
+  "e53ef87b-575d-4ac2-a296-1de61c45289c": {
+    "id": "e53ef87b-575d-4ac2-a296-1de61c45289c",
+    "org_id": "28cac474-219d-46f7-8371-11be753a77a9",
+    "user_id": "22c67250-e52f-4db9-a50a-6852f88d5f11",
+    "name": "Daily Summary Report",
+    "type": "daily_summary",
+    "template_id": "daily_summary",
+    "format": "pdf",
+    "status": "completed",
+    "size_bytes": 2269,
+    "generated_at": "2026-09-12T05:34:02.269481+00:00",
+    "download_url": "/api/v1/reports/e53ef87b-575d-4ac2-a296-1de61c45289c/download",
+    "content_type": "application/pdf",
+    "filename": "daily_summary_e53ef87b.pdf",
+    "parameters": {
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-12"
+    }
+  }
+}

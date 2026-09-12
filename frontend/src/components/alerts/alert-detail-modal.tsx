@@ -13,7 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatDate, formatRelativeTime } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,

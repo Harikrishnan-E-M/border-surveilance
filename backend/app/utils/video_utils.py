@@ -74,9 +74,21 @@ def open_opencv_capture(stream_url: str | int) -> cv2.VideoCapture:
                 pass
 
     if isinstance(source, int) and sys.platform.startswith("win"):
-        return cv2.VideoCapture(source, cv2.CAP_DSHOW)
+        cap = cv2.VideoCapture(source, cv2.CAP_DSHOW)
+        try:
+            cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 1500)
+            cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 1500)
+        except Exception:
+            pass
+        return cap
 
-    return cv2.VideoCapture(source)
+    cap = cv2.VideoCapture(source)
+    try:
+        cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 1500)
+        cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 1500)
+    except Exception:
+        pass
+    return cap
 
 
 def _get_ffprobe_path() -> str:

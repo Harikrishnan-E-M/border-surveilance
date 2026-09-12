@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { apiClient } from '@/lib/api-client';
 import { ZoneEditor, type Zone as EditorZone } from '@/components/camera/zone-editor';
 

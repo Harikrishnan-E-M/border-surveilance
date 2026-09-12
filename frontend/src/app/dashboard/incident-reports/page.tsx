@@ -11,12 +11,10 @@ import {
   Loader2,
   Download,
   Plus,
-  Clock,
   Eye,
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  Filter,
   ChevronLeft,
   ChevronRight,
   LayoutTemplate,
@@ -171,7 +169,7 @@ export default function IncidentReportsPage() {
   const [generateType, setGenerateType] = useState<string>('incident');
   const [generateAlertId, setGenerateAlertId] = useState('');
   const [generateDateFrom, setGenerateDateFrom] = useState('');
-  const [generateDateTo, setGenerateDateTo] = useState('');
+  const [_generateDateTo, setGenerateDateTo] = useState('');
   const [generateTitle, setGenerateTitle] = useState('');
 
   // Preview dialog state
@@ -207,7 +205,6 @@ export default function IncidentReportsPage() {
   const {
     data: reportsData,
     isLoading: reportsLoading,
-    refetch: refetchReports,
   } = useQuery({
     queryKey: ['incident-reports', page, filterType, filterStatus, filterStartDate, filterEndDate],
     queryFn: async () => {
@@ -1096,7 +1093,7 @@ export default function IncidentReportsPage() {
                           </span>
                         </div>
                       )}
-                      {previewReport.metadata_json.severity && (
+                      {Boolean(previewReport.metadata_json.severity) && (
                         <div>
                           <span className="text-slate-500">Severity:</span>{' '}
                           <span className="font-medium">
@@ -1104,7 +1101,7 @@ export default function IncidentReportsPage() {
                           </span>
                         </div>
                       )}
-                      {previewReport.metadata_json.alert_type && (
+                      {Boolean(previewReport.metadata_json.alert_type) && (
                         <div>
                           <span className="text-slate-500">Alert type:</span>{' '}
                           <span className="font-medium">
@@ -1120,7 +1117,7 @@ export default function IncidentReportsPage() {
                           </span>
                         </div>
                       )}
-                      {previewReport.metadata_json.date && (
+                      {Boolean(previewReport.metadata_json.date) && (
                         <div>
                           <span className="text-slate-500">Date:</span>{' '}
                           <span className="font-medium">
@@ -1128,7 +1125,7 @@ export default function IncidentReportsPage() {
                           </span>
                         </div>
                       )}
-                      {previewReport.metadata_json.week_start && (
+                      {Boolean(previewReport.metadata_json.week_start) && (
                         <div>
                           <span className="text-slate-500">Week start:</span>{' '}
                           <span className="font-medium">

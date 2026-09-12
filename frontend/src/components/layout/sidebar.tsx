@@ -10,7 +10,6 @@ import {
   Camera,
   Users,
   Car,
-  BarChart3,
   Film,
   FileText,
   Settings,
@@ -18,15 +17,9 @@ import {
   ChevronDown,
   ChevronRight,
   Shield,
-  Footprints,
-  Flame,
-  UserCheck,
-  HardHat,
-  TrendingUp,
   UserCog,
   BellRing,
   ClipboardList,
-  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Camera, CameraHealth, PaginatedResponse } from "@/types/api";
+import type { Camera, CameraHealth } from "@/types/api";
 import type { GridLayout, CameraFilters, CameraGridItem } from "@/types/camera";
 import { api } from "@/lib/api-client";
 

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
 import {
   FileText,
   BarChart3,
@@ -26,7 +25,6 @@ import {
   File,
   Repeat,
   Trash2,
-  X,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +48,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiClient } from '@/lib/api-client';
+import { getAccessToken } from '@/lib/auth';
 import { formatBytes, formatDate } from '@/lib/utils';
 
 interface ReportTemplate {
@@ -165,11 +164,6 @@ const templateColors: Record<string, string> = {
   custom: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
 };
 
-const formatIcons: Record<string, React.ElementType> = {
-  pdf: File,
-  excel: FileSpreadsheet,
-  csv: FileText,
-};
 
 export default function ReportsPage() {
   const queryClient = useQueryClient();
@@ -213,18 +207,37 @@ export default function ReportsPage() {
   const { data: reportsData, isLoading: reportsLoading } = useQuery({
     queryKey: ['reports', 'generated', reportPage],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/reports', {
+      const res: any = await apiClient.get('/api/v1/reports', {
         params: { page: reportPage, page_size: reportPageSize },
       });
-      return res.data as { items: GeneratedReport[]; total: number };
+      if (res && Array.isArray(res.items)) {
+        return res as { items: GeneratedReport[]; total: number };
+      }
+      if (res && res.data && Array.isArray(res.data.items)) {
+        return res.data as { items: GeneratedReport[]; total: number };
+      }
+      return {
+        items: (Array.isArray(res) ? res : (res?.data || [])) as GeneratedReport[],
+        total: (res?.total || 0),
+      };
     },
+    refetchInterval: 3000,
   });
 
   const { data: scheduledData, isLoading: scheduledLoading } = useQuery({
     queryKey: ['reports', 'scheduled'],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/reports/schedules');
-      return res.data as { items: ScheduledReport[]; total: number };
+      const res: any = await apiClient.get('/api/v1/reports/schedules');
+      if (res && Array.isArray(res.items)) {
+        return res as { items: ScheduledReport[]; total: number };
+      }
+      if (res && res.data && Array.isArray(res.data.items)) {
+        return res.data as { items: ScheduledReport[]; total: number };
+      }
+      return {
+        items: (Array.isArray(res) ? res : (res?.data || [])) as ScheduledReport[],
+        total: (res?.total || 0),
+      };
     },
   });
 
@@ -235,12 +248,11 @@ export default function ReportsPage() {
 
   const generateMutation = useMutation({
     mutationFn: async (payload: {
-      template_id: string;
-      date_from: string;
-      date_to: string;
-      camera_ids: string[];
+      report_type: string;
+      start_date: string;
+      end_date: string;
+      camera_ids?: string[];
       format: string;
-      recipients: string[];
     }) => {
       const res = await apiClient.post('/api/v1/reports/generate', payload);
       return res.data;
@@ -249,6 +261,7 @@ export default function ReportsPage() {
       queryClient.invalidateQueries({ queryKey: ['reports', 'generated'] });
       setShowGenerateDialog(false);
       resetGenerateForm();
+      setActiveTab('generated');
     },
   });
 
@@ -299,11 +312,13 @@ export default function ReportsPage() {
   };
 
   const openGenerateDialog = (template: ReportTemplate) => {
+    generateMutation.reset();
     setSelectedTemplate(template);
     setShowGenerateDialog(true);
   };
 
   const openScheduleDialog = (template: ReportTemplate) => {
+    scheduleMutation.reset();
     setScheduleTemplate(template);
     setShowScheduleDialog(true);
   };
@@ -311,18 +326,28 @@ export default function ReportsPage() {
   const handleGenerate = () => {
     if (!selectedTemplate) return;
 
-    const recipients = generateForm.recipients
-      .split(',')
-      .map((r) => r.trim())
-      .filter(Boolean);
+    const toCleanDate = (val: string) => {
+      const today = new Date().toISOString().split('T')[0];
+      if (!val) return today;
+      try {
+        const parsed = new Date(val);
+        if (!isNaN(parsed.getTime())) {
+          return parsed.toISOString().split('T')[0];
+        }
+      } catch (e) {}
+      return val.split('T')[0].split(' ')[0] || today;
+    };
+
+    const reportType = selectedTemplate.id.replace(/-/g, '_');
+    const startDate = toCleanDate(generateForm.date_from);
+    const endDate = toCleanDate(generateForm.date_to);
 
     generateMutation.mutate({
-      template_id: selectedTemplate.id,
-      date_from: generateForm.date_from,
-      date_to: generateForm.date_to,
-      camera_ids: generateForm.camera_ids,
+      report_type: reportType,
+      start_date: startDate,
+      end_date: endDate,
+      camera_ids: generateForm.camera_ids.length > 0 ? generateForm.camera_ids : undefined,
       format: generateForm.format,
-      recipients,
     });
   };
 
@@ -343,25 +368,34 @@ export default function ReportsPage() {
   };
 
   const handleDownloadReport = async (report: GeneratedReport) => {
-    if (!report.download_url) return;
-
     try {
-      const res = await apiClient.get(`/api/v1/reports/${report.id}/download`, {
+      const token = getAccessToken();
+      const tokenParam = token ? `?token=${token}` : '';
+      const endpoint = report.download_url
+        ? `${report.download_url}${report.download_url.includes('?') ? '&' : '?'}${tokenParam.replace('?', '')}`
+        : `/api/v1/reports/${report.id}/download${tokenParam}`;
+
+      const res: any = await apiClient.get(endpoint, {
         responseType: 'blob',
       });
 
       const extension = report.format === 'excel' ? 'xlsx' : report.format;
-      const blob = new Blob([res.data]);
+      const rawData = res instanceof Blob ? res : (res?.data instanceof Blob ? res.data : res?.data || res);
+      const blob = rawData instanceof Blob ? rawData : new Blob([rawData], { type: report.format === 'pdf' ? 'application/pdf' : 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${report.name}.${extension}`;
+      a.download = `${report.name.replace(/\s+/g, '_')}.${extension}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Report download failed:', error);
+      console.error('Report download via blob failed, falling back to direct window open:', error);
+      const token = getAccessToken();
+      const tokenParam = token ? `?token=${token}` : '';
+      const fallbackUrl = `/api/v1/reports/${report.id}/download${tokenParam}`;
+      window.open(fallbackUrl, '_blank');
     }
   };
 
@@ -576,7 +610,7 @@ export default function ReportsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDownloadReport(report)}
-                              disabled={report.status !== 'completed' || !report.download_url}
+                              disabled={report.status !== 'completed'}
                               title="Download"
                             >
                               <Download className="h-4 w-4" />
@@ -764,7 +798,7 @@ export default function ReportsPage() {
           <div className="space-y-4">
             {generateMutation.isError && (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
-                {(generateMutation.error as Record<string, string>)?.message || 'Failed to generate report'}
+                {((generateMutation.error as unknown as Record<string, string>)?.message) || 'Failed to generate report'}
               </div>
             )}
 
@@ -957,7 +991,7 @@ export default function ReportsPage() {
           <div className="space-y-4">
             {scheduleMutation.isError && (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
-                {(scheduleMutation.error as Record<string, string>)?.message || 'Failed to schedule report'}
+                {((scheduleMutation.error as unknown as Record<string, string>)?.message) || 'Failed to schedule report'}
               </div>
             )}
 

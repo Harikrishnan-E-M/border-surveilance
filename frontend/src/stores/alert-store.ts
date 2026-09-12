@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Alert, AlertSeverity, AlertStatus, RuleType, PaginatedResponse } from "@/types/api";
+import type { Alert, AlertSeverity } from "@/types/api";
 import type { AlertFilters, AlertStats } from "@/types/alert";
 import { api } from "@/lib/api-client";
 import { WebSocketManager } from "@/lib/websocket";

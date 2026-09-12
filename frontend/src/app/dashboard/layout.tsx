@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useAlertStore } from '@/stores/useAlertStore';
 import { getAccessToken, isAuthenticated as checkTokenValid } from '@/lib/auth';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
@@ -16,20 +15,11 @@ import {
   Video,
   Bell,
   Camera,
-  ShieldCheck,
   Users,
   Car,
-  Footprints,
-  Flame,
-  CalendarCheck,
-  HardHat,
-  TrendingUp,
   Film,
   FileBarChart,
   Settings,
-  UserCog,
-  BellRing,
-  ClipboardList,
   ChevronLeft,
   ChevronRight,
   Search,
@@ -105,7 +95,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { unreadCount } = useAlertStore();
   const { theme, setTheme } = useTheme();
 
@@ -136,7 +126,7 @@ export default function DashboardLayout({
   }, [pathname]);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (_e: MouseEvent) => {
       if (userMenuOpen) {
         setUserMenuOpen(false);
       }

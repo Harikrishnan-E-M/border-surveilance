@@ -128,10 +128,14 @@ class CameraStreamWorker:
         """Retrieve the most recent frame from the buffer.
 
         Returns:
-            The latest frame as a numpy array, or None if the buffer is empty.
+            The latest frame as a numpy array, or None if the buffer is empty or stale.
         """
         with self._lock:
             if self._frames:
+                if self._metrics.last_frame_at:
+                    age = (datetime.now(timezone.utc) - self._metrics.last_frame_at).total_seconds()
+                    if age > 5.0:
+                        return None
                 return self._frames[-1]
             return None
 
@@ -239,17 +243,9 @@ class CameraStreamWorker:
                     delay=reconnect_delay,
                     attempt=self._metrics.reconnect_count,
                 )
-                if self._metrics.reconnect_count >= 3:
-                    self._metrics.state = StreamState.ERROR
-                    logger.warning(
-                        "Max reconnect attempts reached (3/3), marking ERROR state",
-                        camera=self.camera_name,
-                    )
-                    break
-
                 if self._stop_event.wait(timeout=reconnect_delay):
                     break
-                reconnect_delay = min(reconnect_delay * RECONNECT_BACKOFF_MULTIPLIER, MAX_RECONNECT_DELAY)
+                reconnect_delay = min(reconnect_delay * RECONNECT_BACKOFF_MULTIPLIER, 10.0)
                 continue
 
             # Connection successful -- reset backoff
@@ -270,7 +266,8 @@ class CameraStreamWorker:
 
                 if not ret or frame is None:
                     consecutive_failures += 1
-                    if consecutive_failures >= 10:
+                    time.sleep(0.03)
+                    if consecutive_failures >= 15:
                         self._metrics.last_error = "Too many consecutive read failures"
                         logger.warning("Too many read failures, reconnecting", camera=self.camera_name)
                         break

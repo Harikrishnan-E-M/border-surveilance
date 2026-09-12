@@ -32,7 +32,7 @@ export function AlertFeed({
   const [alerts, setAlerts] = useState<AlertData[]>(initialAlerts);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
-  const [newAlertCount, setNewAlertCount] = useState(0);
+  const [_newAlertCount, setNewAlertCount] = useState(0);
   const wsRef = useRef<WebSocket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);

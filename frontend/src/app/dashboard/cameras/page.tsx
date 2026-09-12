@@ -19,8 +19,8 @@ import {
   X,
   Video,
   Settings,
-  Trash2,
   AlertCircle,
+  Trash2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,6 +81,15 @@ export default function CamerasPage() {
       queryClient.invalidateQueries({ queryKey: ['cameras'] });
       setShowAddDialog(false);
       reset();
+    },
+  });
+
+  const deleteCameraMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/api/v1/cameras/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cameras'] });
     },
   });
 
@@ -221,12 +230,29 @@ export default function CamerasPage() {
                     {protocolBadge(cam.protocol)}
                   </div>
                 </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-slate-900 dark:text-white">{cam.name}</h3>
-                  <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                    <MapPin className="h-3 w-3" />
-                    {cam.location}
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{cam.name}</h3>
+                    <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                      <MapPin className="h-3 w-3" />
+                      {cam.location}
+                    </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    title="Delete camera"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (confirm(`Are you sure you want to delete camera "${cam.name}"?`)) {
+                        deleteCameraMutation.mutate(cam.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
             </Link>
@@ -278,11 +304,26 @@ export default function CamerasPage() {
                     <td className="px-4 py-3">{statusBadge(cam.status)}</td>
                     <td className="px-4 py-3">{protocolBadge(cam.protocol)}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/cameras/${cam.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Settings className="h-4 w-4" />
+                      <div className="flex items-center justify-end gap-1">
+                        <Link href={`/dashboard/cameras/${cam.id}`}>
+                          <Button variant="ghost" size="sm" title="Camera Settings">
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                          title="Delete camera"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete camera "${cam.name}"?`)) {
+                              deleteCameraMutation.mutate(cam.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

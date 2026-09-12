@@ -291,11 +291,14 @@ def _register_middleware(app: FastAPI, settings: Settings) -> None:
 
 
 def _register_routers(app: FastAPI) -> None:
-    """Mount all API version routers.
+    """Mount all API version routers and static storage directory."""
+    from pathlib import Path
+    from fastapi.staticfiles import StaticFiles
 
-    API v1 routes are imported lazily to keep the module-level import
-    graph clean and avoid circular imports.
-    """
+    storage_dir = Path(__file__).resolve().parent.parent / "storage"
+    storage_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/storage", StaticFiles(directory=str(storage_dir)), name="storage")
+
     try:
         from app.api.v1 import router as api_v1_router
 

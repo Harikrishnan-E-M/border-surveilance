@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
@@ -15,12 +15,8 @@ import {
   Scissors,
   Activity,
   ArrowRight,
-  Upload,
   RefreshCw,
   Eye,
-  ChevronDown,
-  ChevronUp,
-  MapPin,
   Route,
   BarChart3,
   AlertCircle,
@@ -32,13 +28,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -243,7 +232,7 @@ function ActivePersonsPanel({
   });
 
   // WebSocket for real-time updates
-  const { subscribe } = useWebSocket('/reid', { enabled: true });
+  useWebSocket('/reid', { enabled: true });
 
   const persons = activeData ?? [];
 
@@ -492,7 +481,7 @@ function SearchByImage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [threshold, setThreshold] = useState(0.4);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
+
 
   const searchMutation = useMutation<
     { matches: SearchResult[]; total: number },

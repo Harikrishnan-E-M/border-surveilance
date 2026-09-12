@@ -2,11 +2,9 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, formatDistanceToNow } from 'date-fns';
 import {
   Loader2,
   Upload,
-  Plus,
   Trash2,
   Camera,
   Map,
@@ -15,31 +13,17 @@ import {
   AlertTriangle,
   Clock,
   Maximize2,
-  Minimize2,
   ZoomIn,
   ZoomOut,
-  RotateCw,
-  Move,
-  Eye,
-  EyeOff,
   ChevronLeft,
   ChevronRight,
   Building,
   Crosshair,
   Activity,
   BarChart3,
-  RefreshCw,
-  Settings,
   MousePointer,
   Gauge,
 } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -58,9 +42,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -75,9 +57,6 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 
 // -------------------------------------------------------------------
@@ -188,21 +167,6 @@ interface AvailableCamera {
 // -------------------------------------------------------------------
 // Constants
 // -------------------------------------------------------------------
-
-const ZONE_COLORS = [
-  '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
-  '#8B5CF6', '#EC4899', '#06B6D4', '#F97316',
-];
-
-const HEATMAP_GRADIENT = [
-  'rgba(0, 0, 255, 0)',
-  'rgba(0, 0, 255, 0.3)',
-  'rgba(0, 255, 0, 0.5)',
-  'rgba(255, 255, 0, 0.7)',
-  'rgba(255, 0, 0, 0.9)',
-];
-
-const PIE_COLORS = ['#10B981', '#F59E0B', '#EF4444', '#6B7280'];
 
 // -------------------------------------------------------------------
 // Helper Components

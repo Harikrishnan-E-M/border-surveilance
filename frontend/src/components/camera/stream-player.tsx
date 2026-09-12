@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   Volume2,
   VolumeX,
-  Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

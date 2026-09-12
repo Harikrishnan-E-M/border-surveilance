@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Settings,
   Building2,
   Shield,
   Database,
@@ -17,7 +16,6 @@ import {
   Copy,
   Eye,
   EyeOff,
-  RefreshCw,
   CheckCircle2,
   AlertCircle,
   Key,

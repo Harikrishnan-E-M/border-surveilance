@@ -7,15 +7,15 @@ import { Loader2, Eye } from 'lucide-react';
 
 export default function RootPage() {
   const router = useRouter();
-  const { accessToken, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    if (accessToken && isAuthenticated()) {
+    if (isAuthenticated) {
       router.replace('/dashboard');
     } else {
       router.replace('/login');
     }
-  }, [accessToken, isAuthenticated, router]);
+  }, [isAuthenticated, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">

@@ -102,7 +102,7 @@ def _require_operator(user: User) -> None:
 
 
 def _alert_to_response(alert: Alert) -> dict:
-    return AlertResponse(
+    res = AlertResponse(
         id=alert.id,
         org_id=alert.org_id,
         camera_id=alert.camera_id,
@@ -123,6 +123,19 @@ def _alert_to_response(alert: Alert) -> dict:
         created_at=alert.created_at,
         updated_at=alert.updated_at,
     ).model_dump(mode="json")
+
+    cam_name = alert.camera.name if (hasattr(alert, "camera") and alert.camera) else f"Camera {str(alert.camera_id)[:8]}"
+    res["type"] = res["alert_type"]
+    res["camera_name"] = cam_name
+    res["cameraName"] = cam_name
+    snap_url = alert.snapshot_path
+    if not snap_url or not str(snap_url).startswith(("http", "data:")):
+        snap_url = f"/api/v1/cameras/{alert.camera_id}/snapshot.jpg"
+
+    res["snapshot_url"] = snap_url
+    res["snapshotUrl"] = snap_url
+    res["timestamp"] = alert.created_at.isoformat() if alert.created_at else ""
+    return res
 
 
 # ---------------------------------------------------------------------------

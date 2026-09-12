@@ -7,7 +7,6 @@ import {
   Area,
   BarChart,
   Bar,
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -15,7 +14,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  Cell,
 } from 'recharts';
 import { format, parseISO, addDays } from 'date-fns';
 import {
@@ -267,13 +265,6 @@ function AccuracyGauge({ value, label }: { value: number; label: string }) {
       : clampedValue >= 70
         ? 'text-yellow-600 dark:text-yellow-400'
         : 'text-red-600 dark:text-red-400';
-
-  const bgColour =
-    clampedValue >= 85
-      ? 'bg-green-500'
-      : clampedValue >= 70
-        ? 'bg-yellow-500'
-        : 'bg-red-500';
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -709,7 +700,7 @@ export default function PredictionsPage() {
                 </div>
               </CardContent>
             </Card>
-            {(alertPrediction?.predictions ?? []).slice(0, 2).map((ap, i) => (
+            {(alertPrediction?.predictions ?? []).slice(0, 2).map((ap) => (
               <Card key={ap.alert_type}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">

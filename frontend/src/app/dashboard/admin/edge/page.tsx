@@ -1,45 +1,34 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Cpu,
   Plus,
   Search,
   Loader2,
   MoreHorizontal,
   Pencil,
   Trash2,
-  Power,
-  PowerOff,
   AlertCircle,
   CheckCircle2,
-  X,
-  RefreshCw,
   Activity,
-  HardDrive,
   Thermometer,
   Wifi,
   WifiOff,
   Server,
-  MemoryStick,
   Gauge,
   Upload,
   RotateCcw,
-  Eye,
-  Settings,
   BarChart3,
   Clock,
   Zap,
-  MonitorSpeaker,
   Signal,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -249,13 +238,6 @@ function statusColor(status: string): string {
   if (status === 'warning') return 'text-amber-500';
   if (status === 'critical') return 'text-red-500';
   return 'text-slate-400';
-}
-
-function usageBarColor(pct: number | null): string {
-  if (pct === null) return 'bg-slate-300 dark:bg-slate-600';
-  if (pct >= 90) return 'bg-red-500';
-  if (pct >= 70) return 'bg-amber-500';
-  return 'bg-green-500';
 }
 
 function formatUptime(seconds: number | null): string {

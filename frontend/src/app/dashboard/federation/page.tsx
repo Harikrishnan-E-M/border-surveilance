@@ -21,13 +21,8 @@ import {
   WifiOff,
   MapPin,
   BarChart3,
-  Activity,
   Link2,
-  Unlink,
-  Eye,
   Trash2,
-  Settings2,
-  Zap,
   X,
   ArrowUpDown,
 } from 'lucide-react';
@@ -246,7 +241,7 @@ export default function FederationPage() {
 
   // Sync history state
   const [syncSiteId, setSyncSiteId] = useState<string | null>(null);
-  const [syncPage, setSyncPage] = useState(1);
+  const [syncPage, _setSyncPage] = useState(1);
 
   // ── Queries ─────────────────────────────────────────────────────────
 

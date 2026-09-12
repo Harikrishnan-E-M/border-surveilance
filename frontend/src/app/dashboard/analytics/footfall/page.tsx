@@ -167,7 +167,7 @@ export default function FootfallAnalyticsPage() {
   // Queries
   // -------------------------------------------------------------------
 
-  const { data: cameras, isLoading: camerasLoading } = useQuery<Camera[]>({
+  const { data: cameras } = useQuery<Camera[]>({
     queryKey: ['cameras-list'],
     queryFn: async () => {
       const res = await apiClient.get('/api/v1/cameras', {

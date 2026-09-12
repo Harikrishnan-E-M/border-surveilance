@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Persistent Border Daily Report</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 40px; color: #1e293b; background-color: #f8fafc; }
+        h1 { color: #0f172a; border-bottom: 3px solid #0284c7; padding-bottom: 12px; }
+        h2 { color: #0369a1; margin-top: 30px; }
+        table { border-collapse: collapse; width: 100%; margin: 12px 0 24px 0; background: white; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px 14px; text-align: left; }
+        th { background-color: #0f172a; color: white; }
+        tr:nth-child(even) { background-color: #f1f5f9; }
+        .meta { color: #64748b; font-size: 0.9em; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>IBVAP — Intelligent Border Video Analytics Report</h1>
+    <h2>Persistent Border Daily Report</h2>
+    <p class="meta">
+        Surveillance Period: 2026-09-01 to 2026-09-12<br>
+        Generated At: 2026-09-11T23:14:57.604811+00:00
+    </p>
+    
+        <h2>Border Incident & Alert Summary</h2>
+        <p>Total Breach Events: <strong>12</strong></p>
+        <h3>By Severity Level</h3>
+        <table><tr><th>Severity</th><th>Count</th></tr><tr><td>critical</td><td>3</td></tr><tr><td>high</td><td>5</td></tr><tr><td>medium</td><td>4</td></tr></table>
+        <h3>By Event Category</h3>
+        <table><tr><th>Category</th><th>Count</th></tr><tr><td>virtual_fence_breach</td><td>6</td></tr><tr><td>loitering</td><td>4</td></tr><tr><td>anpr_plate_scan</td><td>2</td></tr></table>
+        
+    <hr style="border: 0; border-top: 1px solid #cbd5e1; margin-top: 40px;">
+    <p class="meta">Generated automatically by IBVAP Border Surveillance Platform.</p>
+</body>
+</html>

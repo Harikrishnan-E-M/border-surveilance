@@ -4,11 +4,9 @@ import type { User, LoginRequest, LoginResponse } from "@/types/api";
 import {
   setAccessToken,
   setRefreshToken,
-  removeAccessToken,
   getAccessToken,
   isAuthenticated as checkAuth,
   clearTokens,
-  parseJWT,
   refreshAccessToken as doRefresh,
 } from "@/lib/auth";
 import { api } from "@/lib/api-client";

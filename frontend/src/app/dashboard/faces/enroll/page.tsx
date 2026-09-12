@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,7 +13,6 @@ import {
   X,
   Loader2,
   UserPlus,
-  Image as ImageIcon,
   Plus,
   CheckCircle2,
   AlertCircle,
@@ -56,8 +55,8 @@ export default function FaceEnrollPage() {
   const { data: existingPerson } = useQuery({
     queryKey: ['persons', editId],
     queryFn: async () => {
-      const res = await apiClient.get(`/api/v1/faces/persons/${editId}`);
-      return res.data;
+      const res: any = await apiClient.get(`/api/v1/faces/persons/${editId}`);
+      return res?.data?.data || res?.data || res;
     },
     enabled: !!editId,
   });
@@ -66,13 +65,12 @@ export default function FaceEnrollPage() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<EnrollFormData>({
     resolver: zodResolver(enrollSchema),
     values: existingPerson
       ? {
-          name: existingPerson.name,
-          group: existingPerson.group,
+          name: existingPerson.name || existingPerson.full_name || '',
+          group: existingPerson.group || existingPerson.person_type || existingPerson.department || 'employee',
           employee_id: existingPerson.employee_id || '',
           notes: existingPerson.notes || '',
         }
@@ -125,11 +123,21 @@ export default function FaceEnrollPage() {
     try {
       let personId = editId;
 
+      const payload = {
+        full_name: data.name,
+        name: data.name,
+        person_type: data.group,
+        group: data.group,
+        department: data.group,
+        employee_id: data.employee_id || undefined,
+        notes: data.notes || undefined,
+      };
+
       if (editId) {
-        await apiClient.put(`/api/v1/faces/persons/${editId}`, data);
+        await apiClient.put(`/api/v1/faces/persons/${editId}`, payload);
       } else {
-        const res = await apiClient.post('/api/v1/faces/persons', data);
-        personId = res.data.id;
+        const res: any = await apiClient.post('/api/v1/faces/persons', payload);
+        personId = res?.data?.id || res?.id || res?.data?.data?.id;
       }
 
       // Upload face images

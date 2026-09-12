@@ -12,12 +12,9 @@ import {
   Loader2,
   Trash2,
   Pencil,
-  Eye,
   ScanFace,
-  Calendar,
-  Filter,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -39,14 +36,28 @@ export default function FacesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [groupFilter, setGroupFilter] = useState('');
 
-  const { data: personsData, isLoading } = useQuery({
+  const { data: personsData, isLoading } = useQuery<{ items: Person[]; total: number; groups: string[] }>({
     queryKey: ['persons', searchQuery, groupFilter],
     queryFn: async () => {
       const params: Record<string, any> = { limit: 200 };
       if (searchQuery) params.search = searchQuery;
       if (groupFilter) params.group = groupFilter;
-      const res = await apiClient.get('/api/v1/faces/persons', { params });
-      return res.data as { items: Person[]; total: number; groups: string[] };
+      const res: any = await apiClient.get('/api/v1/faces/persons', { params });
+      const itemsList = res?.items || res?.data?.items || (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
+      const items: Person[] = (itemsList || []).map((p: any) => ({
+        id: p.id,
+        name: p.name || p.full_name || 'Unknown',
+        group: p.group || p.department || p.person_type || 'employee',
+        thumbnail_url: p.thumbnail_url || null,
+        face_count: p.face_count ?? p.enrollment_count ?? 0,
+        last_seen: p.last_seen || null,
+        created_at: p.created_at || new Date().toISOString(),
+      }));
+      return {
+        items,
+        total: res?.total || res?.data?.total || items.length,
+        groups: res?.groups || res?.data?.groups || ['employees', 'visitors', 'vip', 'blacklisted'],
+      };
     },
   });
 

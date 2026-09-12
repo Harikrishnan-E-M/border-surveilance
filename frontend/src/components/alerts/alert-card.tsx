@@ -5,7 +5,6 @@ import Image from "next/image";
 import {
   AlertTriangle,
   AlertCircle,
-  Info,
   ShieldAlert,
   UserX,
   Flame,

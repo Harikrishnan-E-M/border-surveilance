@@ -120,37 +120,50 @@ async def generate_incident_report(
         db.add(report)
         await db.flush()
 
-        # Fire Celery task
-        generate_incident_report_task.delay(
-            str(user.org_id),
-            str(body.alert_id),
-            str(report.id),
-            str(user.id),
-            str(body.template_id) if body.template_id else None,
-            body.include_evidence,
-        )
+        try:
+            generate_incident_report_task.delay(
+                str(user.org_id),
+                str(body.alert_id),
+                str(report.id),
+                str(user.id),
+                str(body.template_id) if body.template_id else None,
+                body.include_evidence,
+            )
+            logger.info(
+                "Incident report generation queued",
+                report_id=str(report.id),
+                alert_id=str(body.alert_id),
+            )
+            return {
+                "status": "success",
+                "data": {
+                    "id": str(report.id),
+                    "title": report.title,
+                    "report_type": report.report_type.value,
+                    "status": report.status.value,
+                    "alert_id": str(report.alert_id),
+                },
+                "message": "Incident report generation has been queued.",
+            }
+        except Exception as exc:
+            logger.warning("Celery queue failed, completing report generation synchronously", error=str(exc))
+            report = await IncidentReportService.generate_report(
+                db=db,
+                org_id=user.org_id,
+                alert_id=body.alert_id,
+                generated_by=user.id,
+                template_id=body.template_id,
+                include_evidence=body.include_evidence,
+            )
+            report_data = await IncidentReportService.get_report(db, user.org_id, report.id)
+            return {
+                "status": "success",
+                "data": report_data,
+                "message": "Incident report generated successfully.",
+            }
 
-        logger.info(
-            "Incident report generation queued",
-            report_id=str(report.id),
-            alert_id=str(body.alert_id),
-        )
-
-        return {
-            "status": "success",
-            "data": {
-                "id": str(report.id),
-                "title": report.title,
-                "report_type": report.report_type.value,
-                "status": report.status.value,
-                "alert_id": str(report.alert_id),
-            },
-            "message": "Incident report generation has been queued.",
-        }
-
-    except ImportError:
-        # Celery not available -- generate synchronously
-        logger.warning("Celery not available, generating synchronously")
+    except Exception as exc:
+        logger.warning("Generating incident report synchronously", error=str(exc))
         report = await IncidentReportService.generate_report(
             db=db,
             org_id=user.org_id,
@@ -192,39 +205,6 @@ async def generate_daily_summary(
     _require_operator(user)
 
     try:
-        from app.workers.incident_report_tasks import generate_daily_summary_task
-
-        report = IncidentReport(
-            org_id=user.org_id,
-            title=f"Daily Security Summary - {body.report_date.isoformat()}",
-            report_type=ReportType.DAILY_SUMMARY,
-            status=ReportStatus.GENERATING,
-            generated_by=user.id,
-            template_id=body.template_id,
-        )
-        db.add(report)
-        await db.flush()
-
-        generate_daily_summary_task.delay(
-            str(user.org_id),
-            body.report_date.isoformat(),
-            str(report.id),
-            str(user.id),
-            str(body.template_id) if body.template_id else None,
-        )
-
-        return {
-            "status": "success",
-            "data": {
-                "id": str(report.id),
-                "title": report.title,
-                "report_type": report.report_type.value,
-                "status": report.status.value,
-            },
-            "message": "Daily summary report generation has been queued.",
-        }
-
-    except ImportError:
         report = await IncidentReportService.generate_daily_summary(
             db=db,
             org_id=user.org_id,
@@ -238,6 +218,9 @@ async def generate_daily_summary(
             "data": report_data,
             "message": "Daily summary report generated successfully.",
         }
+    except Exception as exc:
+        logger.error("Daily summary generation error", error=str(exc))
+        raise ValidationError(message=f"Daily summary report generation failed: {str(exc)}")
 
 
 # ---------------------------------------------------------------------------
@@ -265,39 +248,6 @@ async def generate_weekly_report(
     _require_operator(user)
 
     try:
-        from app.workers.incident_report_tasks import generate_weekly_report_task
-
-        report = IncidentReport(
-            org_id=user.org_id,
-            title=f"Weekly Security Report - {body.week_start.isoformat()}",
-            report_type=ReportType.WEEKLY_REPORT,
-            status=ReportStatus.GENERATING,
-            generated_by=user.id,
-            template_id=body.template_id,
-        )
-        db.add(report)
-        await db.flush()
-
-        generate_weekly_report_task.delay(
-            str(user.org_id),
-            body.week_start.isoformat(),
-            str(report.id),
-            str(user.id),
-            str(body.template_id) if body.template_id else None,
-        )
-
-        return {
-            "status": "success",
-            "data": {
-                "id": str(report.id),
-                "title": report.title,
-                "report_type": report.report_type.value,
-                "status": report.status.value,
-            },
-            "message": "Weekly report generation has been queued.",
-        }
-
-    except ImportError:
         report = await IncidentReportService.generate_weekly_report(
             db=db,
             org_id=user.org_id,
@@ -311,6 +261,9 @@ async def generate_weekly_report(
             "data": report_data,
             "message": "Weekly report generated successfully.",
         }
+    except Exception as exc:
+        logger.error("Weekly report generation error", error=str(exc))
+        raise ValidationError(message=f"Weekly report generation failed: {str(exc)}")
 
 
 # ---------------------------------------------------------------------------

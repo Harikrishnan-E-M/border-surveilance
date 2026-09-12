@@ -35,11 +35,8 @@ import {
   ToggleLeft,
   ToggleRight,
   Save,
-  AlertCircle,
-  Clock,
   Camera,
   MapPin,
-  RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -145,6 +142,16 @@ export default function CameraDetailPage() {
   const [zoneDialogOpen, setZoneDialogOpen] = useState(false);
   const [ruleDialogOpen, setRuleDialogOpen] = useState(false);
 
+  const deleteCameraMutation = useMutation({
+    mutationFn: async () => {
+      await apiClient.delete(`/api/v1/cameras/${cameraId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cameras'] });
+      router.push('/dashboard/cameras');
+    },
+  });
+
   const { data: camera, isLoading } = useQuery<CameraDetail>({
     queryKey: ['cameras', cameraId],
     queryFn: async () => {
@@ -240,9 +247,9 @@ export default function CameraDetailPage() {
     values: camera
       ? {
           name: camera.name,
-          location: camera.location,
+          location: camera.location ?? camera.location_description ?? '',
           stream_url: camera.stream_url,
-          protocol: camera.protocol as any,
+          protocol: camera.protocol as 'rtsp' | 'rtmp' | 'hls' | 'webrtc',
         }
       : undefined,
   });
@@ -310,6 +317,23 @@ export default function CameraDetailPage() {
             </div>
           </div>
         </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => {
+            if (confirm(`Are you sure you want to delete camera "${camera.name}"?`)) {
+              deleteCameraMutation.mutate();
+            }
+          }}
+          disabled={deleteCameraMutation.isPending}
+        >
+          {deleteCameraMutation.isPending ? (
+            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="mr-1 h-4 w-4" />
+          )}
+          Delete Camera
+        </Button>
       </div>
 
       {/* Tabs */}
@@ -707,81 +731,108 @@ export default function CameraDetailPage() {
       />
 
       {activeTab === 'settings' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Camera Configuration</CardTitle>
-            <CardDescription>Update camera settings</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={handleSubmitSettings((data) => updateCameraMutation.mutate(data))}
-              className="space-y-4 max-w-lg"
-            >
-              {updateCameraMutation.isSuccess && (
-                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400">
-                  Camera settings updated successfully.
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Camera Configuration</CardTitle>
+              <CardDescription>Update camera settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={handleSubmitSettings((data) => updateCameraMutation.mutate(data as CameraSettingsForm))}
+                className="space-y-4 max-w-lg"
+              >
+                {updateCameraMutation.isSuccess && (
+                  <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    Camera settings updated successfully.
+                  </div>
+                )}
+
+                {updateCameraMutation.isError && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
+                    Failed to update camera settings.
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Camera Name</Label>
+                  <Input {...registerSettings('name')} />
+                  {settingsErrors.name && (
+                    <p className="text-xs text-red-500">{settingsErrors.name.message}</p>
+                  )}
                 </div>
-              )}
 
-              {updateCameraMutation.isError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
-                  Failed to update camera settings.
+                <div className="space-y-2">
+                  <Label>Location</Label>
+                  <Input {...registerSettings('location')} />
+                  {settingsErrors.location && (
+                    <p className="text-xs text-red-500">{settingsErrors.location.message}</p>
+                  )}
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label>Camera Name</Label>
-                <Input {...registerSettings('name')} />
-                {settingsErrors.name && (
-                  <p className="text-xs text-red-500">{settingsErrors.name.message}</p>
-                )}
-              </div>
+                <div className="space-y-2">
+                  <Label>Stream URL</Label>
+                  <Input {...registerSettings('stream_url')} />
+                  {settingsErrors.stream_url && (
+                    <p className="text-xs text-red-500">{settingsErrors.stream_url.message}</p>
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                <Label>Location</Label>
-                <Input {...registerSettings('location')} />
-                {settingsErrors.location && (
-                  <p className="text-xs text-red-500">{settingsErrors.location.message}</p>
-                )}
-              </div>
+                <div className="space-y-2">
+                  <Label>Protocol</Label>
+                  <select
+                    {...registerSettings('protocol')}
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  >
+                    <option value="rtsp">RTSP</option>
+                    <option value="rtmp">RTMP</option>
+                    <option value="hls">HLS</option>
+                    <option value="webrtc">WebRTC</option>
+                  </select>
+                </div>
 
-              <div className="space-y-2">
-                <Label>Stream URL</Label>
-                <Input {...registerSettings('stream_url')} />
-                {settingsErrors.stream_url && (
-                  <p className="text-xs text-red-500">{settingsErrors.stream_url.message}</p>
-                )}
-              </div>
+                <Button type="submit" disabled={updateCameraMutation.isPending}>
+                  {updateCameraMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-1 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <Label>Protocol</Label>
-                <select
-                  {...registerSettings('protocol')}
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                >
-                  <option value="rtsp">RTSP</option>
-                  <option value="rtmp">RTMP</option>
-                  <option value="hls">HLS</option>
-                  <option value="webrtc">WebRTC</option>
-                </select>
-              </div>
-
-              <Button type="submit" disabled={updateCameraMutation.isPending}>
-                {updateCameraMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
+          <Card className="border-red-200 dark:border-red-900/50">
+            <CardHeader>
+              <CardTitle className="text-base text-red-600 dark:text-red-400">Danger Zone</CardTitle>
+              <CardDescription>Permanently remove this camera configuration from your organization</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (confirm(`Are you sure you want to delete camera "${camera.name}"?`)) {
+                    deleteCameraMutation.mutate();
+                  }
+                }}
+                disabled={deleteCameraMutation.isPending}
+              >
+                {deleteCameraMutation.isPending ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                 ) : (
-                  <>
-                    <Save className="mr-1 h-4 w-4" />
-                    Save Changes
-                  </>
+                  <Trash2 className="mr-1 h-4 w-4" />
                 )}
+                Delete Camera
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

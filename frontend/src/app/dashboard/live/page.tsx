@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Maximize2,
@@ -9,15 +9,12 @@ import {
   Grid3X3,
   Square,
   Loader2,
-  Video,
   VideoOff,
   Camera,
   ChevronDown,
   LayoutGrid,
-  AlertCircle,
   Play,
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/api-client';

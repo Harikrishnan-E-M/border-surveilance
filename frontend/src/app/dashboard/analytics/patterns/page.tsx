@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { format, subDays, parseISO } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import {
   Loader2,
   TrendingUp,
